@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#090909" />
+<meta name="description" content="MBTI OS — Your Personal Operating System. Know yourself, grow yourself, work better together." />
+<title>MBTI OS — Your Personal Operating System</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   MBTI OS — Design tokens
+   ============================================================ */
+:root{
+  /* Palette (from brief) */
+  --bg:#090909;
+  --bg-2:#111111;
+  --card:#181818;
+  --accent:#FF7A00;
+  --accent-hover:#FF9D3D;
+  --text:#FFFFFF;
+  --text-2:#A0A0A0;
+  --success:#22C55E;
+  --warning:#F59E0B;
+  --danger:#EF4444;
+
+  /* Derived */
+  --accent-soft:rgba(255,122,0,.14);
+  --accent-line:rgba(255,122,0,.34);
+  --line:rgba(255,255,255,.07);
+  --line-strong:rgba(255,255,255,.12);
+  --glass:rgba(24,24,24,.62);
+  --glass-2:rgba(20,20,20,.55);
+  --elev:0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -22px rgba(0,0,0,.9);
+  --glow:0 0 0 1px var(--accent-line), 0 12px 44px -14px rgba(255,122,0,.42);
+
+  /* Type */
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-th:'Prompt',sans-serif;
+
+  /* Geometry */
+  --r-lg:24px;
+  --r-md:16px;
+  --r-sm:12px;
+  --r-xs:9px;
+  --sidebar-w:264px;
+  --header-h:68px;
+
+  /* Motion */
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+}
+html[data-lang="th"]{ --font:'Prompt',sans-serif; }
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+*,*::before,*::after{ -webkit-tap-highlight-color:transparent; }
+
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  letter-spacing:-.01em;
+}
+/* Ambient background */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:-2;
+  background:
+    radial-gradient(1100px 620px at 78% -8%, rgba(255,122,0,.16), transparent 60%),
+    radial-gradient(900px 620px at -6% 8%, rgba(255,157,61,.07), transparent 55%),
+    linear-gradient(180deg,#0b0b0b, #070707 60%);
+}
+body::after{
+  content:"";
+  position:fixed; inset:0; z-index:-1; opacity:.05; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.09); border-radius:20px; border:2px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,.18); background-clip:content-box; }
+
+::selection{ background:var(--accent-soft); color:#fff; }
+
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+button{ font:inherit; color:inherit; cursor:pointer; background:none; border:none; }
+a{ color:inherit; text-decoration:none; }
+input,textarea{ font:inherit; color:inherit; }
+img{ max-width:100%; display:block; }
+
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+/* ============================================================
+   App shell
+   ============================================================ */
+.app{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; min-height:100vh; }
+.app[hidden]{ display:none; }
+
+/* Sidebar */
+.sidebar{
+  position:sticky; top:0; height:100vh;
+  display:flex; flex-direction:column;
+  padding:22px 16px;
+  background:linear-gradient(180deg, rgba(17,17,17,.9), rgba(9,9,9,.82));
+  border-right:1px solid var(--line);
+  backdrop-filter:blur(18px);
+  z-index:40;
+}
+.brand{ display:flex; align-items:center; gap:12px; padding:8px 8px 18px; }
+.brand .mark{
+  width:40px; height:40px; border-radius:12px; flex:none;
+  display:grid; place-items:center;
+  background:linear-gradient(140deg,var(--accent),#c85a00);
+  box-shadow:0 8px 22px -8px rgba(255,122,0,.7), inset 0 1px 0 rgba(255,255,255,.35);
+  font-weight:800; color:#1a0d00; font-size:18px;
+}
+.brand .word{ display:flex; flex-direction:column; line-height:1.15; }
+.brand .word b{ font-size:16px; font-weight:800; letter-spacing:-.02em; }
+.brand .word span{ font-size:11px; color:var(--text-2); font-weight:500; }
+
+.nav{ display:flex; flex-direction:column; gap:3px; overflow-y:auto; padding:4px 2px; margin-top:4px; }
+.nav::-webkit-scrollbar{ width:0; }
+.nav-item{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 12px; border-radius:12px;
+  color:var(--text-2); font-weight:500; font-size:14px;
+  position:relative; transition:color .2s var(--ease), background .2s var(--ease);
+  text-align:left; width:100%;
+}
+.nav-item svg{ width:19px; height:19px; flex:none; }
+.nav-item:hover{ color:var(--text); background:rgba(255,255,255,.04); }
+.nav-item.active{ color:var(--text); background:linear-gradient(90deg, var(--accent-soft), rgba(255,122,0,.02)); }
+.nav-item.active::before{
+  content:""; position:absolute; left:-6px; top:50%; transform:translateY(-50%);
+  width:3px; height:20px; border-radius:4px; background:var(--accent);
+  box-shadow:0 0 12px 1px var(--accent);
+}
+.nav-foot{ margin-top:auto; padding-top:14px; }
+.mini-card{
+  border:1px solid var(--line); border-radius:16px; padding:14px;
+  background:var(--glass-2); backdrop-filter:blur(8px);
+}
+.mini-card .row{ display:flex; align-items:center; gap:10px; }
+.mini-card .type{ font-weight:800; font-size:15px; letter-spacing:.02em; }
+.mini-card .role{ font-size:11px; color:var(--text-2); }
+.mini-avatar{
+  width:34px;height:34px;border-radius:10px;flex:none;display:grid;place-items:center;
+  font-weight:800;font-size:12px;color:#1a0d00;background:linear-gradient(140deg,var(--accent-hover),var(--accent));
+}
+
+/* Main column */
+.main{ min-width:0; display:flex; flex-direction:column; }
+
+/* Header */
+.header{
+  position:sticky; top:0; z-index:35;
+  height:var(--header-h);
+  display:flex; align-items:center; gap:14px;
+  padding:0 clamp(16px,3vw,34px);
+  background:rgba(9,9,9,.55);
+  backdrop-filter:blur(20px) saturate(1.3);
+  border-bottom:1px solid var(--line);
+}
+.header .h-title{ display:flex; flex-direction:column; line-height:1.2; min-width:0; }
+.header .h-title b{ font-size:16px; font-weight:700; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.header .h-title span{ font-size:12px; color:var(--text-2); }
+.header .spacer{ flex:1; }
+
+.h-search{
+  display:flex; align-items:center; gap:9px;
+  height:40px; padding:0 14px; min-width:190px; max-width:320px; flex:1;
+  border:1px solid var(--line); border-radius:12px;
+  background:var(--glass-2); color:var(--text-2);
+  transition:border .2s, box-shadow .2s;
+}
+.h-search:focus-within{ border-color:var(--accent-line); box-shadow:0 0 0 3px var(--accent-soft); }
+.h-search svg{ width:16px;height:16px;flex:none; }
+.h-search input{ background:none; border:none; outline:none; width:100%; color:var(--text); font-size:13.5px; }
+.h-search kbd{
+  font-family:var(--font); font-size:10.5px; color:var(--text-2);
+  border:1px solid var(--line-strong); border-radius:6px; padding:2px 6px; background:rgba(255,255,255,.03);
+}
+
+.lang-toggle{
+  display:flex; align-items:center; padding:3px; gap:2px;
+  border:1px solid var(--line); border-radius:11px; background:var(--glass-2);
+}
+.lang-toggle button{
+  padding:6px 11px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--text-2);
+  transition:all .2s var(--ease);
+}
+.lang-toggle button.on{ color:#1a0d00; background:linear-gradient(140deg,var(--accent-hover),var(--accent)); box-shadow:0 4px 12px -4px rgba(255,122,0,.6); }
+
+.icon-btn{
+  width:40px; height:40px; border-radius:12px; flex:none;
+  display:grid; place-items:center; color:var(--text-2);
+  border:1px solid var(--line); background:var(--glass-2);
+  transition:all .2s var(--ease); position:relative;
+}
+.icon-btn:hover{ color:var(--text); border-color:var(--line-strong); transform:translateY(-1px); }
+.icon-btn svg{ width:18px; height:18px; }
+.icon-btn .dot{ position:absolute; top:9px; right:10px; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 2px var(--bg-2), 0 0 8px var(--accent); }
+.avatar-btn{ background:linear-gradient(140deg,var(--accent-hover),var(--accent)); color:#1a0d00; font-weight:800; font-size:13px; border-color:transparent; }
+
+/* View area */
+.view{ padding:clamp(18px,3vw,34px); max-width:1240px; width:100%; margin:0 auto; flex:1; }
+.page-head{ margin-bottom:22px; }
+.page-head h1{ font-size:clamp(22px,3.4vw,30px); font-weight:800; letter-spacing:-.035em; }
+.page-head p{ color:var(--text-2); font-size:14px; margin-top:5px; max-width:60ch; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+  padding:5px 11px; border:1px solid var(--accent-line); border-radius:99px; background:var(--accent-soft);
+  margin-bottom:14px;
+}
+.eyebrow svg{ width:13px; height:13px; }
+
+/* ============================================================
+   Cards & primitives
+   ============================================================ */
+.card{
+  background:var(--glass); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--elev); backdrop-filter:blur(14px);
+  padding:22px; position:relative; overflow:hidden;
+  transition:transform .35s var(--ease-out), border-color .3s, box-shadow .3s;
+}
+.card.hover:hover{ transform:translateY(-4px); border-color:var(--line-strong); box-shadow:var(--elev),0 26px 60px -34px rgba(0,0,0,.95); }
+.card-h{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+.card-h h3{ font-size:15px; font-weight:700; letter-spacing:-.01em; display:flex; align-items:center; gap:9px; }
+.card-h h3 svg{ width:17px; height:17px; color:var(--accent); }
+.card-h .sub{ font-size:12px; color:var(--text-2); }
+
+.grid{ display:grid; gap:18px; }
+.g-2{ grid-template-columns:repeat(2,1fr); }
+.g-3{ grid-template-columns:repeat(3,1fr); }
+.g-4{ grid-template-columns:repeat(4,1fr); }
+.span-2{ grid-column:span 2; }
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:99px;
+  font-size:12px; font-weight:600; border:1px solid var(--line); color:var(--text-2); background:rgba(255,255,255,.02);
+}
+.pill svg{ width:13px; height:13px; }
+.pill.accent{ color:var(--accent); border-color:var(--accent-line); background:var(--accent-soft); }
+.pill.ok{ color:var(--success); border-color:rgba(34,197,94,.3); background:rgba(34,197,94,.1); }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  height:44px; padding:0 20px; border-radius:13px; font-weight:650; font-size:14px;
+  position:relative; overflow:hidden; transition:transform .18s var(--ease), box-shadow .25s, background .2s;
+  white-space:nowrap;
+}
+.btn svg{ width:17px; height:17px; }
+.btn-primary{ background:linear-gradient(140deg,var(--accent-hover),var(--accent)); color:#1a0d00; box-shadow:0 12px 30px -12px rgba(255,122,0,.75); }
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 16px 40px -12px rgba(255,122,0,.9); }
+.btn-primary:active{ transform:translateY(0); }
+.btn-ghost{ border:1px solid var(--line-strong); color:var(--text); background:var(--glass-2); }
+.btn-ghost:hover{ border-color:var(--accent-line); color:#fff; transform:translateY(-2px); }
+.btn-sm{ height:36px; padding:0 14px; font-size:13px; border-radius:10px; }
+.btn-block{ width:100%; }
+.btn .ripple{ position:absolute; border-radius:50%; transform:scale(0); background:rgba(255,255,255,.4); pointer-events:none; animation:ripple .6s var(--ease-out); }
+@keyframes ripple{ to{ transform:scale(3); opacity:0; } }
+
+/* Stat tiles */
+.stat{ display:flex; flex-direction:column; gap:12px; }
+.stat .top{ display:flex; align-items:center; justify-content:space-between; }
+.stat .ic{ width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); }
+.stat .ic svg{ width:19px; height:19px; }
+.stat .val{ font-size:30px; font-weight:800; letter-spacing:-.04em; line-height:1; }
+.stat .lbl{ font-size:12.5px; color:var(--text-2); }
+.trend{ font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:3px; }
+.trend.up{ color:var(--success); } .trend.down{ color:var(--danger); }
+
+/* Progress bar */
+.bar{ height:8px; border-radius:99px; background:rgba(255,255,255,.06); overflow:hidden; }
+.bar > i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--accent-hover)); width:0; transition:width 1s var(--ease-out); }
+
+/* Progress ring */
+.ring{ position:relative; width:118px; height:118px; }
+.ring svg{ transform:rotate(-90deg); }
+.ring .track{ fill:none; stroke:rgba(255,255,255,.07); stroke-width:9; }
+.ring .prog{ fill:none; stroke:url(#ringGrad); stroke-width:9; stroke-linecap:round; }
+.ring .mid{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+.ring .mid b{ font-size:26px; font-weight:800; letter-spacing:-.03em; }
+.ring .mid span{ font-size:10.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:.1em; }
+
+/* Segmented control */
+.seg{ display:inline-flex; padding:3px; gap:2px; border:1px solid var(--line); border-radius:11px; background:var(--glass-2); }
+.seg button{ padding:7px 13px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--text-2); transition:all .2s; }
+.seg button.on{ color:#fff; background:rgba(255,255,255,.07); }
+
+/* Chip list */
+.chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{ display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:11px; font-size:13px; font-weight:500;
+  border:1px solid var(--line); background:rgba(255,255,255,.02); color:var(--text); }
+.chip svg{ width:14px; height:14px; color:var(--accent); flex:none; }
+
+/* List rows */
+.rowlist{ display:flex; flex-direction:column; }
+.lrow{ display:flex; align-items:center; gap:13px; padding:13px 4px; border-bottom:1px solid var(--line); }
+.lrow:last-child{ border-bottom:none; }
+.lrow .lic{ width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent); }
+.lrow .lic svg{ width:17px;height:17px; }
+.lrow .lmain{ flex:1; min-width:0; }
+.lrow .lmain b{ font-size:14px; font-weight:600; display:block; }
+.lrow .lmain span{ font-size:12.5px; color:var(--text-2); }
+
+/* Function stack */
+.func{ display:flex; flex-direction:column; gap:10px; }
+.func .f{ display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.02); }
+.func .badge{ width:44px; height:44px; border-radius:12px; flex:none; display:grid; place-items:center; font-weight:800; font-size:15px; }
+.func .b0{ background:linear-gradient(140deg,var(--accent),#b85000); color:#1a0d00; }
+.func .b1{ background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); }
+.func .b2{ background:rgba(255,255,255,.05); color:var(--text); }
+.func .b3{ background:rgba(255,255,255,.03); color:var(--text-2); }
+.func .ftext b{ font-size:14px; } .func .ftext span{ font-size:12px; color:var(--text-2); }
+.func .frole{ margin-left:auto; font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:.08em; }
+
+/* Chart wrap */
+.chartbox{ position:relative; width:100%; }
+.chartbox.h-radar{ height:300px; } .chartbox.h-line{ height:240px; } .chartbox.h-donut{ height:230px; }
+
+/* Empty state */
+.empty{ text-align:center; padding:34px 18px; color:var(--text-2); }
+.empty .ill{ width:70px; height:70px; margin:0 auto 14px; border-radius:20px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); }
+.empty .ill svg{ width:30px; height:30px; }
+.empty b{ display:block; color:var(--text); font-size:15px; margin-bottom:4px; }
+
+/* Mission */
+.mission{ background:linear-gradient(135deg, rgba(255,122,0,.14), rgba(255,157,61,.03)); border-color:var(--accent-line); }
+.mission .m-check{ width:26px;height:26px;border-radius:8px;border:2px solid var(--accent-line);display:grid;place-items:center;flex:none;transition:all .2s;cursor:pointer; }
+.mission .m-check.done{ background:var(--accent); border-color:var(--accent); }
+.mission .m-check svg{ width:15px;height:15px;color:#1a0d00;opacity:0;transition:opacity .2s; }
+.mission .m-check.done svg{ opacity:1; }
+
+/* ============================================================
+   Hero card
+   ============================================================ */
+.hero{
+  position:relative; overflow:hidden;
+  border:1px solid var(--accent-line);
+  background:
+    radial-gradient(600px 300px at 100% 0%, rgba(255,122,0,.22), transparent 60%),
+    linear-gradient(140deg, rgba(30,20,10,.7), rgba(17,17,17,.6));
+}
+.hero .type-xl{
+  font-size:clamp(50px,9vw,96px); font-weight:900; letter-spacing:-.06em; line-height:.9;
+  background:linear-gradient(120deg,#fff 20%, var(--accent-hover));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.hero .greet{ font-size:14px; color:var(--text-2); }
+.hero .greet b{ color:#fff; }
+.hero .pname{ font-size:clamp(18px,3vw,24px); font-weight:700; letter-spacing:-.02em; margin-top:2px; }
+.hero-scores{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:6px; }
+.score{ border:1px solid var(--line); border-radius:16px; padding:14px; background:var(--glass-2); }
+.score .sh{ display:flex; align-items:center; gap:8px; color:var(--text-2); font-size:12px; }
+.score .sh svg{ width:15px; height:15px; }
+.score .sv{ font-size:24px; font-weight:800; letter-spacing:-.03em; margin:8px 0 8px; }
+
+/* ============================================================
+   Onboarding
+   ============================================================ */
+.onboard{
+  position:fixed; inset:0; z-index:200; display:grid; place-items:center;
+  padding:24px; background:radial-gradient(1000px 700px at 70% 10%, rgba(255,122,0,.16), transparent 60%), #070707;
+}
+.onboard[hidden]{ display:none; }
+.onboard .ob-card{
+  max-width:560px; width:100%; text-align:center;
+  border:1px solid var(--line); border-radius:30px; padding:clamp(28px,5vw,52px);
+  background:var(--glass); backdrop-filter:blur(20px); box-shadow:0 40px 120px -40px rgba(0,0,0,.9);
+}
+.onboard .ob-mark{
+  width:70px; height:70px; border-radius:20px; margin:0 auto 22px; display:grid; place-items:center;
+  background:linear-gradient(140deg,var(--accent),#c85a00); font-weight:900; font-size:28px; color:#1a0d00;
+  box-shadow:0 14px 40px -10px rgba(255,122,0,.7), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.onboard h1{ font-size:clamp(28px,5vw,40px); font-weight:900; letter-spacing:-.045em; line-height:1.05; }
+.onboard .sub{ color:var(--text-2); margin-top:14px; font-size:16px; line-height:1.6; }
+.onboard .ask{ margin-top:26px; font-size:15px; font-weight:600; }
+.onboard .actions{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+.onboard .ob-lang{ position:absolute; top:22px; right:22px; }
+
+/* ============================================================
+   Modal
+   ============================================================ */
+.modal-scrim{
+  position:fixed; inset:0; z-index:150; display:grid; place-items:center; padding:20px;
+  background:rgba(4,4,4,.72); backdrop-filter:blur(6px); opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.modal-scrim.open{ opacity:1; pointer-events:auto; }
+.modal{
+  width:100%; max-width:720px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column;
+  border:1px solid var(--line-strong); border-radius:26px; background:var(--bg-2);
+  box-shadow:0 50px 130px -40px rgba(0,0,0,.95); transform:translateY(14px) scale(.98); transition:transform .35s var(--ease-out);
+}
+.modal-scrim.open .modal{ transform:none; }
+.modal-h{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:24px 24px 16px; border-bottom:1px solid var(--line); }
+.modal-h h2{ font-size:20px; font-weight:800; letter-spacing:-.03em; }
+.modal-h p{ font-size:13px; color:var(--text-2); margin-top:4px; }
+.modal-b{ padding:20px 24px 26px; overflow-y:auto; }
+.modal-close{ width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:var(--text-2);border:1px solid var(--line);flex:none; transition:all .2s; }
+.modal-close:hover{ color:#fff; border-color:var(--line-strong); }
+
+.mbti-group{ margin-bottom:22px; }
+.mbti-group:last-child{ margin-bottom:0; }
+.mbti-group .gh{ display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+.mbti-group .gdot{ width:9px; height:9px; border-radius:50%; }
+.mbti-group .gname{ font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.mbti-group .gdesc{ font-size:11.5px; color:var(--text-2); }
+.mbti-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.mbti-cell{
+  border:1px solid var(--line); border-radius:15px; padding:13px 12px; text-align:left;
+  background:rgba(255,255,255,.02); transition:all .22s var(--ease); position:relative;
+}
+.mbti-cell:hover{ border-color:var(--accent-line); background:var(--accent-soft); transform:translateY(-3px); }
+.mbti-cell.sel{ border-color:var(--accent); background:var(--accent-soft); box-shadow:var(--glow); }
+.mbti-cell b{ font-size:15px; font-weight:800; letter-spacing:.03em; display:block; }
+.mbti-cell span{ font-size:11px; color:var(--text-2); display:block; margin-top:2px; line-height:1.3; }
+.mbti-cell .tick{ position:absolute; top:9px; right:9px; opacity:0; color:var(--accent); transition:opacity .2s; }
+.mbti-cell .tick svg{ width:15px;height:15px; }
+.mbti-cell.sel .tick{ opacity:1; }
+
+/* ============================================================
+   Toast
+   ============================================================ */
+.toasts{ position:fixed; z-index:300; right:20px; bottom:calc(20px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+.toast{
+  display:flex; align-items:center; gap:11px; padding:13px 16px; min-width:240px; max-width:360px;
+  border:1px solid var(--line-strong); border-radius:14px; background:var(--bg-2);
+  box-shadow:0 24px 50px -20px rgba(0,0,0,.9); transform:translateX(120%); transition:transform .45s var(--ease-out);
+}
+.toast.show{ transform:none; }
+.toast .ti{ width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center; }
+.toast .ti svg{ width:17px;height:17px; }
+.toast.ok .ti{ background:rgba(34,197,94,.14); color:var(--success); }
+.toast.info .ti{ background:var(--accent-soft); color:var(--accent); }
+.toast.warn .ti{ background:rgba(245,158,11,.14); color:var(--warning); }
+.toast b{ font-size:13.5px; font-weight:600; display:block; }
+.toast span{ font-size:12px; color:var(--text-2); }
+
+/* ============================================================
+   FAB
+   ============================================================ */
+.fab-wrap{ position:fixed; right:24px; bottom:calc(24px + env(safe-area-inset-bottom)); z-index:120; display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+.fab-menu{ display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+.fab-menu .fitem{ display:flex; align-items:center; gap:10px; opacity:0; transform:translateY(10px) scale(.9); pointer-events:none; transition:all .25s var(--ease-out); }
+.fab-wrap.open .fab-menu .fitem{ opacity:1; transform:none; pointer-events:auto; }
+.fab-menu .flabel{ font-size:12.5px; font-weight:600; padding:6px 11px; border-radius:9px; background:var(--bg-2); border:1px solid var(--line); box-shadow:0 8px 20px -10px rgba(0,0,0,.8); }
+.fab-menu .fbtn{ width:44px; height:44px; border-radius:14px; display:grid; place-items:center; background:var(--card); border:1px solid var(--line-strong); color:var(--text); box-shadow:0 10px 26px -12px rgba(0,0,0,.8); transition:all .2s; }
+.fab-menu .fbtn:hover{ border-color:var(--accent-line); color:var(--accent); transform:translateY(-2px); }
+.fab-menu .fbtn svg{ width:19px;height:19px; }
+.fab{
+  width:58px; height:58px; border-radius:19px; display:grid; place-items:center;
+  background:linear-gradient(140deg,var(--accent-hover),var(--accent)); color:#1a0d00;
+  box-shadow:0 18px 44px -14px rgba(255,122,0,.8), inset 0 1px 0 rgba(255,255,255,.4);
+  transition:transform .3s var(--ease-out);
+}
+.fab svg{ width:26px; height:26px; transition:transform .3s var(--ease-out); }
+.fab-wrap.open .fab svg{ transform:rotate(135deg); }
+.fab:hover{ transform:translateY(-2px) scale(1.03); }
+
+/* ============================================================
+   Skeleton
+   ============================================================ */
+.skel{ position:relative; overflow:hidden; background:rgba(255,255,255,.04); border-radius:10px; }
+.skel::after{ content:""; position:absolute; inset:0; transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent); animation:shimmer 1.4s infinite; }
+@keyframes shimmer{ 100%{ transform:translateX(100%); } }
+
+/* Boot loader */
+.boot{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; background:#070707; transition:opacity .5s; }
+.boot[hidden]{ display:none; }
+.boot.fade{ opacity:0; pointer-events:none; }
+.loader{ position:relative; width:74px; height:74px; }
+.loader .o{ position:absolute; inset:0; border-radius:50%; border:2px solid transparent; }
+.loader .o1{ border-top-color:var(--accent); animation:spin 1s linear infinite; }
+.loader .o2{ inset:11px; border-top-color:var(--accent-hover); animation:spin 1.5s linear infinite reverse; }
+.loader .o3{ inset:22px; border-radius:12px; background:linear-gradient(140deg,var(--accent),#b85000); box-shadow:0 0 24px rgba(255,122,0,.6); animation:pulse 1.4s ease-in-out infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes pulse{ 50%{ transform:scale(.82); opacity:.7; } }
+.boot .bt{ position:absolute; bottom:16%; left:0; right:0; text-align:center; color:var(--text-2); font-size:13px; letter-spacing:.14em; text-transform:uppercase; }
+
+/* ============================================================
+   Bottom nav (mobile)
+   ============================================================ */
+.botnav{ display:none; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width:1080px){
+  :root{ --sidebar-w:78px; }
+  .brand .word, .nav-item span.lbl, .nav-foot{ display:none; }
+  .brand{ justify-content:center; padding:8px 0 18px; }
+  .nav-item{ justify-content:center; padding:12px; }
+  .nav-item.active::before{ left:-4px; }
+  .h-search{ display:none; }
+}
+@media (max-width:760px){
+  :root{ --header-h:60px; }
+  .app{ grid-template-columns:1fr; }
+  .sidebar{ display:none; }
+  .g-4{ grid-template-columns:repeat(2,1fr); }
+  .g-3{ grid-template-columns:1fr; }
+  .g-2{ grid-template-columns:1fr; }
+  .span-2{ grid-column:auto; }
+  .hero-scores{ grid-template-columns:repeat(2,1fr); }
+  .mbti-grid{ grid-template-columns:repeat(2,1fr); }
+  .view{ padding:16px 16px 96px; }
+  .header{ padding:0 16px; }
+  .h-title span{ display:none; }
+  .fab-wrap{ bottom:calc(84px + env(safe-area-inset-bottom)); right:16px; }
+  .toasts{ right:12px; left:12px; bottom:calc(84px + env(safe-area-inset-bottom)); align-items:stretch; }
+  .toast{ max-width:none; }
+
+  .botnav{
+    display:flex; position:fixed; bottom:0; left:0; right:0; z-index:60;
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(9,9,9,.82); backdrop-filter:blur(20px); border-top:1px solid var(--line);
+    justify-content:space-around;
+  }
+  .botnav .bn{ display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 8px; border-radius:12px; color:var(--text-2); flex:1; max-width:74px; transition:color .2s; }
+  .botnav .bn svg{ width:21px; height:21px; }
+  .botnav .bn span{ font-size:10px; font-weight:600; }
+  .botnav .bn.active{ color:var(--accent); }
+  .botnav .more-sheet{}
+}
+@media (max-width:400px){
+  .g-4{ grid-template-columns:1fr; }
+  .hero-scores{ grid-template-columns:1fr 1fr; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Boot loader -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="loader"><div class="o o1"></div><div class="o o2"></div><div class="o o3"></div></div>
+  <div class="bt">MBTI OS</div>
+</div>
+
+<!-- Onboarding -->
+<div class="onboard" id="onboard" role="dialog" aria-modal="true" aria-labelledby="ob-title">
+  <div class="ob-lang">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button data-lang-set="th">TH</button>
+      <button data-lang-set="en" class="on">EN</button>
+    </div>
+  </div>
+  <div class="ob-card">
+    <div class="ob-mark">M</div>
+    <h1 id="ob-title" data-i18n="ob_title">Welcome to MBTI OS</h1>
+    <p class="sub" data-i18n="ob_sub">Know Yourself. Grow Yourself. Work better together with insights built around your personality.</p>
+    <div class="ask" data-i18n="ob_ask">Do you already know your MBTI type?</div>
+    <div class="actions">
+      <button class="btn btn-primary" id="ob-select"><span data-i18n="ob_cta">Select My MBTI</span></button>
+      <button class="btn btn-ghost" id="ob-unknown" data-i18n="ob_unknown">I'm not sure yet</button>
+    </div>
+  </div>
+</div>
+
+<!-- App shell -->
+<div class="app" id="app" hidden>
+  <!-- Sidebar -->
+  <aside class="sidebar" aria-label="Primary">
+    <div class="brand">
+      <div class="mark">M</div>
+      <div class="word"><b>MBTI OS</b><span data-i18n="brand_tag">Your Personal OS</span></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="nav-foot">
+      <div class="mini-card">
+        <div class="row">
+          <div class="mini-avatar" id="mini-type">–</div>
+          <div><div class="type" id="mini-code">Not set</div><div class="role" id="mini-role" data-i18n="pick_type">Pick your type</div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="header">
+      <div class="h-title"><b id="view-title">Dashboard</b><span id="view-sub" data-i18n="brand_tag">Your Personal Operating System</span></div>
+      <div class="spacer"></div>
+      <label class="h-search" aria-label="Search">
+        <svg data-lucide="search"></svg>
+        <input id="search" type="text" placeholder="Search…" data-i18n-ph="search_ph" />
+        <kbd>/</kbd>
+      </label>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button data-lang-set="th">TH</button>
+        <button data-lang-set="en" class="on">EN</button>
+      </div>
+      <button class="icon-btn" id="notif-btn" aria-label="Notifications"><svg data-lucide="bell"></svg><span class="dot"></span></button>
+      <button class="icon-btn avatar-btn" id="profile-btn" aria-label="Profile">U</button>
+    </header>
+
+    <main class="view" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- Bottom nav (mobile) -->
+<nav class="botnav" id="botnav" aria-label="Mobile navigation"></nav>
+
+<!-- Modal -->
+<div class="modal-scrim" id="modal-scrim" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-h">
+      <div><h2 id="modal-title">Choose your type</h2><p id="modal-desc"></p></div>
+      <button class="modal-close" id="modal-close" aria-label="Close"><svg data-lucide="x"></svg></button>
+    </div>
+    <div class="modal-b" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab-wrap" id="fab-wrap">
+  <div class="fab-menu" id="fab-menu"></div>
+  <button class="fab" id="fab" aria-label="Quick actions" aria-expanded="false"><svg data-lucide="plus"></svg></button>
+</div>
+
+<!-- Toasts -->
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<!-- SVG gradient defs for rings -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#FF9D3D"/><stop offset="100%" stop-color="#FF7A00"/>
+  </linearGradient>
+</defs></svg>
+
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://unpkg.com/lucide@0.395.0/dist/umd/lucide.min.js"></script>
+
+<script>
+/* ============================================================
+   MBTI OS — Application
+   Vanilla ES2023 · single-file architecture
+   Sections:  1) Data  2) State  3) Utils  4) i18n
+              5) Router/Nav  6) Views  7) Charts
+              8) UI (modal/toast/fab)  9) Boot
+   ============================================================ */
+(() => {
+'use strict';
+
+/* ========================= 1) DATA ========================= */
+
+// Cognitive functions
+const FUNC = {
+  Ni:{en:'Introverted Intuition', th:'สัญชาตญาณภายใน'},
+  Ne:{en:'Extraverted Intuition', th:'สัญชาตญาณภายนอก'},
+  Si:{en:'Introverted Sensing',   th:'การรับรู้ภายใน'},
+  Se:{en:'Extraverted Sensing',   th:'การรับรู้ภายนอก'},
+  Ti:{en:'Introverted Thinking',  th:'ตรรกะภายใน'},
+  Te:{en:'Extraverted Thinking',  th:'ตรรกะภายนอก'},
+  Fi:{en:'Introverted Feeling',   th:'ความรู้สึกภายใน'},
+  Fe:{en:'Extraverted Feeling',   th:'ความรู้สึกภายนอก'},
+};
+const ROLES = [
+  {en:'Dominant', th:'หลัก'},
+  {en:'Auxiliary',th:'รอง'},
+  {en:'Tertiary', th:'สาม'},
+  {en:'Inferior', th:'ด้อย'},
+];
+
+const GROUPS = {
+  analysts:{ name:{en:'Analysts',th:'นักวิเคราะห์'}, desc:{en:'Rational & strategic',th:'มีเหตุผลและเป็นระบบ'}, color:'#A855F7' },
+  diplomats:{name:{en:'Diplomats',th:'นักการทูต'},   desc:{en:'Empathic & idealist',th:'เห็นอกเห็นใจ มีอุดมการณ์'}, color:'#22C55E' },
+  sentinels:{name:{en:'Sentinels',th:'ผู้พิทักษ์'},  desc:{en:'Practical & reliable',th:'มีระเบียบ เชื่อถือได้'}, color:'#38BDF8' },
+  explorers:{name:{en:'Explorers',th:'นักสำรวจ'},     desc:{en:'Spontaneous & hands-on',th:'ยืดหยุ่น ลงมือทำ'}, color:'#FF7A00' },
+};
+
+// Helper to build a type entry compactly
+const T = (code,group,nEn,nTh,tEn,tTh,bEn,bTh,stack,sEn,sTh,gEn,gTh,careers,lEn,lTh,loEn,loTh,best,radar) => ({
+  code,group,
+  name:{en:nEn,th:nTh}, tag:{en:tEn,th:tTh}, blurb:{en:bEn,th:bTh},
+  stack, strengths:{en:sEn,th:sTh}, growth:{en:gEn,th:gTh}, careers,
+  learn:{en:lEn,th:lTh}, love:{en:loEn,th:loTh}, best, radar,
+});
+
+// radar = [Strategy, Empathy, Structure, Adaptability, Drive] 0-100
+const TYPES = {
+INTJ:T('INTJ','analysts','The Strategist','นักวางกลยุทธ์','Independent systems thinker','นักคิดเชิงระบบที่เป็นอิสระ',
+  'You see the long game and build the machine that wins it. Vision plus follow-through is your rare combination.',
+  'คุณมองเกมระยะยาวออกและสร้างระบบเพื่อไปให้ถึง วิสัยทัศน์บวกการลงมือทำคือจุดแข็งที่หายาก',
+  ['Ni','Te','Fi','Se'],
+  ['Long-range strategic vision','Decisive, evidence-led decisions','Self-driven and independent'],
+  ['วิสัยทัศน์เชิงกลยุทธ์ระยะยาว','ตัดสินใจเด็ดขาดบนหลักฐาน','ขับเคลื่อนตัวเองได้ดี'],
+  ['Delegate before you burn out','Voice feelings earlier','Let plans stay flexible'],
+  ['มอบหมายงานก่อนหมดพลัง','บอกความรู้สึกให้เร็วขึ้น','เปิดให้แผนยืดหยุ่นได้'],
+  ['Architect','Data Scientist','Strategy Consultant','Product Lead','Investment Analyst'],
+  'Learns best by building a mental model first, then testing it against real data.',
+  'เรียนรู้ได้ดีด้วยการสร้างโมเดลในหัวก่อน แล้วค่อยทดสอบกับข้อมูลจริง',
+  'Loyal and deep; shows love through reliability and shared goals rather than grand gestures.',
+  'รักลึกและมั่นคง แสดงออกผ่านความน่าเชื่อถือและเป้าหมายร่วม มากกว่าคำหวาน',
+  ['ENFP','ENTP','INFJ'],[95,45,80,50,85]),
+INTP:T('INTP','analysts','The Theorist','นักคิดทฤษฎี','Curious logical explorer','นักสำรวจเชิงตรรกะที่อยากรู้อยากเห็น',
+  'You take ideas apart to see how they truly work. Precision and possibility live comfortably in your head.',
+  'คุณชอบแยกแนวคิดออกเป็นชิ้นเพื่อดูว่ามันทำงานยังไงจริง ๆ ความแม่นยำและความเป็นไปได้อยู่ในหัวคุณพร้อมกัน',
+  ['Ti','Ne','Si','Fe'],
+  ['Deep analytical reasoning','Original problem framing','Open-minded and objective'],
+  ['วิเคราะห์เชิงลึก','ตั้งโจทย์ปัญหาแบบใหม่','เปิดกว้างและเป็นกลาง'],
+  ['Ship before it is perfect','Track routines and deadlines','Share ideas out loud sooner'],
+  ['ส่งงานก่อนจะสมบูรณ์แบบ','จัดการกิจวัตรและเดดไลน์','พูดไอเดียออกมาให้เร็วขึ้น'],
+  ['Software Engineer','Research Scientist','Systems Analyst','UX Researcher','Mathematician'],
+  'Learns by questioning assumptions and connecting abstract concepts into a framework.',
+  'เรียนรู้ด้วยการตั้งคำถามกับสมมติฐานและเชื่อมแนวคิดนามธรรมเข้าเป็นกรอบความคิด',
+  'Values intellectual connection and space; steady partner who dislikes emotional drama.',
+  'ให้คุณค่ากับการเชื่อมโยงทางความคิดและพื้นที่ส่วนตัว เป็นคู่ที่มั่นคงและไม่ชอบดราม่า',
+  ['ENTJ','ENFJ','ESTJ'],[90,50,55,70,55]),
+ENTJ:T('ENTJ','analysts','The Commander','ผู้บัญชาการ','Bold decisive leader','ผู้นำที่กล้าและเด็ดขาด',
+  'You turn vision into an executable plan and rally people around it. Momentum follows you.',
+  'คุณเปลี่ยนวิสัยทัศน์ให้เป็นแผนที่ทำได้จริง และดึงคนมารวมพลังได้ พลังขับเคลื่อนตามคุณมาเสมอ',
+  ['Te','Ni','Se','Fi'],
+  ['Natural strategic leadership','Efficient execution','Confident under pressure'],
+  ['ภาวะผู้นำเชิงกลยุทธ์','ลงมือทำอย่างมีประสิทธิภาพ','มั่นใจภายใต้แรงกดดัน'],
+  ['Slow down to listen','Value process, not only results','Make room for others’ ideas'],
+  ['ช้าลงเพื่อรับฟัง','ให้ค่ากับกระบวนการ ไม่ใช่แค่ผลลัพธ์','เปิดพื้นที่ให้ไอเดียคนอื่น'],
+  ['Executive / CEO','Management Consultant','Entrepreneur','Program Director','Corporate Strategist'],
+  'Learns fast through high-stakes practice and real accountability for outcomes.',
+  'เรียนรู้เร็วผ่านการลงมือทำจริงที่มีเดิมพันและความรับผิดชอบต่อผลลัพธ์',
+  'Direct and committed; loves through growth challenges and building a future together.',
+  'ตรงไปตรงมาและทุ่มเท รักผ่านการผลักดันให้เติบโตและสร้างอนาคตร่วมกัน',
+  ['INFP','INTP','ENFP'],[92,50,78,60,95]),
+ENTP:T('ENTP','analysts','The Innovator','นักคิดนวัตกรรม','Quick-witted idea generator','นักคิดไอเดียที่ไหวพริบดี',
+  'You spot the angle no one else sees and argue it brilliantly. Novelty is oxygen for you.',
+  'คุณมองเห็นมุมที่คนอื่นมองไม่เห็นและถกเถียงได้อย่างเฉียบคม ความแปลกใหม่คือออกซิเจนของคุณ',
+  ['Ne','Ti','Fe','Si'],
+  ['Rapid ideation','Persuasive and adaptable','Thrives on complex problems'],
+  ['คิดไอเดียได้รวดเร็ว','โน้มน้าวเก่งและปรับตัวได้','ชอบปัญหาที่ซับซ้อน'],
+  ['Finish what you start','Respect routine details','Pick battles worth fighting'],
+  ['ทำสิ่งที่เริ่มไว้ให้จบ','ใส่ใจรายละเอียดที่เป็นกิจวัตร','เลือกสมรภูมิที่คุ้มค่าจะสู้'],
+  ['Founder','Product Manager','Creative Director','Growth Strategist','Venture Investor'],
+  'Learns by debating, prototyping, and jumping between many parallel interests.',
+  'เรียนรู้ด้วยการถกเถียง ทำต้นแบบ และกระโดดไปมาระหว่างความสนใจหลายอย่าง',
+  'Playful and stimulating; needs a partner who enjoys banter and independence.',
+  'สนุกและกระตุ้นความคิด ต้องการคู่ที่ชอบหยอกล้อและเป็นตัวของตัวเอง',
+  ['INFJ','INTJ','ENFJ'],[88,55,45,90,80]),
+INFJ:T('INFJ','diplomats','The Counselor','ที่ปรึกษาใจ','Insightful quiet idealist','นักอุดมคติเงียบ ๆ ที่เข้าใจคนลึกซึ้ง',
+  'You read the room and the future at once, guided by a private compass of meaning.',
+  'คุณอ่านทั้งบรรยากาศและอนาคตได้พร้อมกัน โดยมีเข็มทิศแห่งความหมายในใจนำทาง',
+  ['Ni','Fe','Ti','Se'],
+  ['Deep empathy and insight','Purpose-driven focus','Sees patterns in people'],
+  ['เข้าอกเข้าใจและมองทะลุ','โฟกัสด้วยเป้าหมายที่มีความหมาย','มองเห็นแพทเทิร์นของคน'],
+  ['Set boundaries to avoid burnout','Accept imperfect progress','Ask for help openly'],
+  ['ตั้งขอบเขตเพื่อไม่ให้หมดไฟ','ยอมรับความก้าวหน้าที่ไม่สมบูรณ์แบบ','ขอความช่วยเหลืออย่างเปิดใจ'],
+  ['Counselor / Therapist','Writer','HR / People Lead','UX Designer','Non-profit Director'],
+  'Learns through reflection and connecting knowledge to a deeper purpose.',
+  'เรียนรู้ผ่านการใคร่ครวญและเชื่อมความรู้เข้ากับเป้าหมายที่ลึกซึ้ง',
+  'Devoted and intense; seeks authentic, soul-level connection over surface romance.',
+  'ทุ่มเทและลึกซึ้ง มองหาความสัมพันธ์ที่จริงใจระดับจิตวิญญาณมากกว่าความโรแมนติกผิวเผิน',
+  ['ENFP','ENTP','INTJ'],[85,92,65,45,60]),
+INFP:T('INFP','diplomats','The Dreamer','นักฝัน','Gentle values-led creative','นักสร้างสรรค์ที่นำด้วยคุณค่า',
+  'You hold a vivid inner world and a strong sense of right. Meaning matters more than metrics.',
+  'คุณมีโลกภายในที่มีชีวิตชีวาและสำนึกในสิ่งที่ถูกต้องอย่างแรงกล้า ความหมายสำคัญกว่าตัวเลข',
+  ['Fi','Ne','Si','Te'],
+  ['Deep authenticity','Creative imagination','Compassion for others'],
+  ['จริงใจกับตัวเองอย่างลึกซึ้ง','จินตนาการสร้างสรรค์','เมตตาต่อผู้อื่น'],
+  ['Turn ideas into finished work','Handle criticism as data','Build practical structure'],
+  ['เปลี่ยนไอเดียให้เป็นผลงานที่เสร็จ','มองคำวิจารณ์เป็นข้อมูล','สร้างโครงสร้างที่ใช้ได้จริง'],
+  ['Writer / Author','Graphic Designer','Psychologist','Content Creator','Social Worker'],
+  'Learns when material connects to personal values and creative expression.',
+  'เรียนรู้ได้ดีเมื่อเนื้อหาเชื่อมกับคุณค่าส่วนตัวและการแสดงออกเชิงสร้างสรรค์',
+  'Warm and idealistic; loves deeply and needs a partner who honours their inner world.',
+  'อบอุ่นและมีอุดมคติ รักลึกและต้องการคู่ที่เคารพโลกภายในของพวกเขา',
+  ['ENFJ','ENTJ','INFJ'],[70,95,45,70,45]),
+ENFJ:T('ENFJ','diplomats','The Mentor','ผู้นำทางใจ','Warm inspiring guide','ผู้นำที่อบอุ่นและสร้างแรงบันดาลใจ',
+  'You bring out the best in people and move groups toward a shared good.',
+  'คุณดึงศักยภาพที่ดีที่สุดของคนออกมา และพากลุ่มไปสู่สิ่งดีร่วมกัน',
+  ['Fe','Ni','Se','Ti'],
+  ['Inspires and unites people','Reads emotional needs','Organised toward a vision'],
+  ['สร้างแรงบันดาลใจและรวมใจคน','อ่านความต้องการทางอารมณ์','เป็นระบบเพื่อวิสัยทัศน์'],
+  ['Protect your own needs too','Accept that not all is yours to fix','Welcome honest conflict'],
+  ['ดูแลความต้องการของตัวเองด้วย','ยอมรับว่าไม่ใช่ทุกอย่างที่ต้องแก้','เปิดรับความขัดแย้งอย่างจริงใจ'],
+  ['Teacher / Trainer','Team Lead','Communications Director','Coach','Community Manager'],
+  'Learns through discussion, teaching others, and collaborative goals.',
+  'เรียนรู้ผ่านการพูดคุย การสอนผู้อื่น และเป้าหมายที่ทำร่วมกัน',
+  'Generous and attentive; thrives when love is expressed and reciprocated openly.',
+  'ใจกว้างและใส่ใจ เบ่งบานเมื่อความรักถูกแสดงออกและตอบกลับอย่างเปิดเผย',
+  ['INFP','ISFP','INTP'],[80,95,72,60,75]),
+ENFP:T('ENFP','diplomats','The Catalyst','ตัวจุดประกาย','Energetic possibility seeker','นักไขว่คว้าความเป็นไปได้ที่เต็มไปด้วยพลัง',
+  'You light up rooms and ideas alike, chasing connection and what could be.',
+  'คุณจุดประกายทั้งผู้คนและไอเดีย ไล่ตามการเชื่อมโยงและสิ่งที่เป็นไปได้',
+  ['Ne','Fi','Te','Si'],
+  ['Contagious enthusiasm','Creative and empathic','Connects ideas and people'],
+  ['ความกระตือรือร้นที่ติดต่อกันได้','สร้างสรรค์และเข้าใจคน','เชื่อมไอเดียและผู้คน'],
+  ['Follow through on commitments','Focus on fewer priorities','Build steady routines'],
+  ['ทำตามสิ่งที่รับปากให้สำเร็จ','โฟกัสให้น้อยลง','สร้างกิจวัตรที่สม่ำเสมอ'],
+  ['Marketing Lead','Storyteller / PR','Entrepreneur','Designer','Event Producer'],
+  'Learns through exploration, brainstorming, and connecting with people.',
+  'เรียนรู้ผ่านการสำรวจ การระดมสมอง และการเชื่อมโยงกับผู้คน',
+  'Affectionate and spontaneous; needs freedom, depth, and genuine emotional presence.',
+  'อ่อนโยนและเป็นธรรมชาติ ต้องการอิสระ ความลึกซึ้ง และการอยู่ด้วยกันอย่างจริงใจ',
+  ['INTJ','INFJ','ISTJ'],[78,90,45,95,75]),
+ISTJ:T('ISTJ','sentinels','The Organizer','ผู้จัดระเบียบ','Reliable practical planner','นักวางแผนที่พึ่งพาได้และเป็นรูปธรรม',
+  'You keep promises and systems running. When it must be done right, people count on you.',
+  'คุณรักษาคำพูดและทำให้ระบบเดินหน้า เมื่อต้องทำให้ถูกต้อง ผู้คนพึ่งพาคุณ',
+  ['Si','Te','Fi','Ne'],
+  ['Dependable and thorough','Strong sense of duty','Detail and process mastery'],
+  ['เชื่อถือได้และรอบคอบ','สำนึกในหน้าที่สูง','เชี่ยวชาญรายละเอียดและกระบวนการ'],
+  ['Stay open to new methods','Express appreciation aloud','Balance work and rest'],
+  ['เปิดรับวิธีการใหม่ ๆ','พูดชื่นชมออกมา','สมดุลงานและการพักผ่อน'],
+  ['Accountant / Auditor','Operations Manager','Engineer','Compliance Officer','Project Manager'],
+  'Learns step by step with clear structure and proven, concrete examples.',
+  'เรียนรู้ทีละขั้นตอนด้วยโครงสร้างชัดเจนและตัวอย่างที่พิสูจน์แล้ว',
+  'Steadfast and loyal; shows love through consistency, service, and keeping their word.',
+  'มั่นคงและซื่อสัตย์ แสดงความรักผ่านความสม่ำเสมอ การดูแล และการรักษาคำพูด',
+  ['ESFP','ESTP','ISFJ'],[70,50,95,35,70]),
+ISFJ:T('ISFJ','sentinels','The Protector','ผู้ปกป้อง','Caring dependable supporter','ผู้สนับสนุนที่ใส่ใจและพึ่งพาได้',
+  'You notice what others need and quietly make sure it is handled. Care is your craft.',
+  'คุณสังเกตเห็นสิ่งที่คนอื่นต้องการ และเงียบ ๆ ทำให้มันเรียบร้อย ความใส่ใจคืองานฝีมือของคุณ',
+  ['Si','Fe','Ti','Ne'],
+  ['Warm and supportive','Meticulous and reliable','Loyal and observant'],
+  ['อบอุ่นและคอยสนับสนุน','ละเอียดและเชื่อถือได้','ซื่อสัตย์และช่างสังเกต'],
+  ['Say no without guilt','Ask for what you need','Embrace change gradually'],
+  ['ปฏิเสธได้โดยไม่รู้สึกผิด','ขอในสิ่งที่ตัวเองต้องการ','ค่อย ๆ เปิดรับการเปลี่ยนแปลง'],
+  ['Nurse / Healthcare','Teacher','Administrator','Customer Success','Librarian'],
+  'Learns best in a calm, structured setting with practical, useful detail.',
+  'เรียนรู้ได้ดีในบรรยากาศที่สงบ มีระเบียบ และมีรายละเอียดที่ใช้ได้จริง',
+  'Nurturing and devoted; expresses love through thoughtful acts of service.',
+  'ทะนุถนอมและทุ่มเท แสดงความรักผ่านการดูแลเอาใจใส่ในรายละเอียด',
+  ['ESFP','ESTP','ISTJ'],[55,90,90,35,50]),
+ESTJ:T('ESTJ','sentinels','The Director','ผู้กำกับ','Organised results-driven manager','ผู้จัดการที่เป็นระบบและมุ่งผลลัพธ์',
+  'You bring order to chaos and get teams delivering. Clear standards, clear outcomes.',
+  'คุณสร้างระเบียบจากความวุ่นวายและทำให้ทีมส่งงานได้ มาตรฐานชัด ผลลัพธ์ชัด',
+  ['Te','Si','Ne','Fi'],
+  ['Strong organiser and leader','Practical and decisive','Upholds standards'],
+  ['จัดการและนำทีมเก่ง','เป็นรูปธรรมและเด็ดขาด','รักษามาตรฐาน'],
+  ['Soften delivery of feedback','Stay open to new ideas','Notice feelings in the room'],
+  ['ให้ฟีดแบ็กอย่างนุ่มนวลขึ้น','เปิดรับไอเดียใหม่','สังเกตอารมณ์ของคนรอบข้าง'],
+  ['Operations Director','Business Manager','Financial Officer','Sales Lead','Administrator'],
+  'Learns by doing, with clear goals, deadlines, and measurable results.',
+  'เรียนรู้ด้วยการลงมือทำ พร้อมเป้าหมาย เดดไลน์ และผลลัพธ์ที่วัดได้',
+  'Dependable and traditional; shows commitment through stability and shared duty.',
+  'พึ่งพาได้และให้ค่ากับแบบแผน แสดงความผูกพันผ่านความมั่นคงและหน้าที่ร่วมกัน',
+  ['ISFP','ISTP','ESFJ'],[72,45,95,45,85]),
+ESFJ:T('ESFJ','sentinels','The Host','ผู้ดูแล','Sociable caring coordinator','ผู้ประสานงานที่เข้าสังคมและใส่ใจ',
+  'You create belonging and keep people connected. Harmony is something you actively build.',
+  'คุณสร้างความรู้สึกเป็นส่วนหนึ่งและทำให้ผู้คนเชื่อมโยงกัน ความกลมเกลียวคือสิ่งที่คุณสร้างอย่างตั้งใจ',
+  ['Fe','Si','Ne','Ti'],
+  ['Warm and welcoming','Practical helper','Strong community builder'],
+  ['อบอุ่นและต้อนรับ','ช่วยเหลืออย่างเป็นรูปธรรม','สร้างชุมชนได้ดี'],
+  ['Value your own opinion too','Handle criticism calmly','Allow others their choices'],
+  ['ให้ค่ากับความเห็นของตัวเองด้วย','รับคำวิจารณ์อย่างใจเย็น','ให้คนอื่นได้เลือกทางของเขา'],
+  ['HR Manager','Event Coordinator','Healthcare Admin','Account Manager','Community Lead'],
+  'Learns collaboratively with clear expectations and supportive feedback.',
+  'เรียนรู้แบบร่วมมือ พร้อมความคาดหวังที่ชัดเจนและฟีดแบ็กที่สนับสนุน',
+  'Attentive and loyal; thrives on appreciation and shared social life.',
+  'ใส่ใจและซื่อสัตย์ เบ่งบานเมื่อได้รับการชื่นชมและมีชีวิตสังคมร่วมกัน',
+  ['ISFP','ISTP','ESTJ'],[58,90,88,50,68]),
+ISTP:T('ISTP','explorers','The Maker','นักลงมือ','Practical hands-on problem-solver','นักแก้ปัญหาที่ลงมือทำจริง',
+  'You understand how things work by taking them apart. Calm, precise, unflappable in a crisis.',
+  'คุณเข้าใจว่าสิ่งต่าง ๆ ทำงานยังไงด้วยการลงมือรื้อ นิ่ง แม่นยำ และไม่ตื่นตระหนกในภาวะวิกฤต',
+  ['Ti','Se','Ni','Fe'],
+  ['Cool-headed troubleshooter','Hands-on and adaptable','Efficient and logical'],
+  ['แก้ปัญหาเฉพาะหน้าได้เย็น','ลงมือทำและปรับตัวเก่ง','มีประสิทธิภาพและมีเหตุผล'],
+  ['Communicate plans to others','Commit for the long term','Share feelings sooner'],
+  ['สื่อสารแผนให้คนอื่นรู้','ผูกพันในระยะยาว','บอกความรู้สึกให้เร็วขึ้น'],
+  ['Engineer / Mechanic','Pilot','Security Analyst','Developer','Field Technician'],
+  'Learns by tinkering, taking things apart, and immediate hands-on practice.',
+  'เรียนรู้ด้วยการลองผิดลองถูก รื้อของ และฝึกลงมือทันที',
+  'Independent and easygoing; shows care through action and shared adventures.',
+  'เป็นอิสระและสบาย ๆ แสดงความห่วงใยผ่านการกระทำและการผจญภัยร่วมกัน',
+  ['ESFJ','ESTJ','ENTP'],[75,45,60,90,70]),
+ISFP:T('ISFP','explorers','The Artist','ศิลปิน','Gentle aesthetic free spirit','จิตวิญญาณเสรีที่รักความงาม',
+  'You live through the senses and your own quiet code of values. Beauty and authenticity guide you.',
+  'คุณใช้ชีวิตผ่านประสาทสัมผัสและหลักคุณค่าเงียบ ๆ ของตัวเอง ความงามและความจริงใจนำทางคุณ',
+  ['Fi','Se','Ni','Te'],
+  ['Artistic and expressive','Warm and present','Flexible and open'],
+  ['มีศิลปะและแสดงออก','อบอุ่นและอยู่กับปัจจุบัน','ยืดหยุ่นและเปิดกว้าง'],
+  ['Plan a little for the future','Speak up in groups','Turn passion into finished work'],
+  ['วางแผนอนาคตสักเล็กน้อย','กล้าพูดในกลุ่ม','เปลี่ยนความหลงใหลเป็นผลงานที่เสร็จ'],
+  ['Designer / Artist','Photographer','Chef','Musician','Craftsperson'],
+  'Learns through hands-on, sensory, and creative experiences at their own pace.',
+  'เรียนรู้ผ่านประสบการณ์ที่ลงมือทำ สัมผัสได้ และสร้างสรรค์ ในจังหวะของตัวเอง',
+  'Tender and loyal; expresses love through presence, touch, and small beautiful gestures.',
+  'อ่อนโยนและซื่อสัตย์ แสดงความรักผ่านการอยู่ด้วยกัน สัมผัส และการกระทำเล็ก ๆ ที่งดงาม',
+  ['ESFJ','ESTJ','ENFJ'],[60,90,50,88,50]),
+ESTP:T('ESTP','explorers','The Dynamo','นักบุกเบิก','Bold action-oriented realist','นักลงมือที่กล้าและมองความจริง',
+  'You read a situation fast and act while others hesitate. Energy, nerve, and results.',
+  'คุณอ่านสถานการณ์ได้เร็วและลงมือขณะที่คนอื่นยังลังเล พลัง ความกล้า และผลลัพธ์',
+  ['Se','Ti','Fe','Ni'],
+  ['Quick, decisive action','Persuasive and bold','Thrives in fast change'],
+  ['ลงมือรวดเร็วเด็ดขาด','โน้มน้าวเก่งและกล้า','เก่งในสถานการณ์ที่เปลี่ยนเร็ว'],
+  ['Think a step ahead','Slow down for others','Follow through after the thrill'],
+  ['คิดล่วงหน้าอีกก้าว','ช้าลงเพื่อคนอื่น','ทำต่อให้จบหลังหมดความตื่นเต้น'],
+  ['Sales / Business Dev','Entrepreneur','Emergency Responder','Trader','Operations Lead'],
+  'Learns fastest by doing it live, with real stakes and quick feedback.',
+  'เรียนรู้เร็วที่สุดด้วยการทำจริง มีเดิมพัน และได้ฟีดแบ็กทันที',
+  'Fun and spontaneous; keeps love exciting and grounded in shared experience.',
+  'สนุกและเป็นธรรมชาติ ทำให้ความรักตื่นเต้นและมีรากจากประสบการณ์ร่วมกัน',
+  ['ISFJ','ISTJ','ISFP'],[68,55,55,95,88]),
+ESFP:T('ESFP','explorers','The Performer','ผู้สร้างสีสัน','Vibrant spontaneous entertainer','ผู้สร้างความสนุกที่มีชีวิตชีวา',
+  'You bring joy and presence wherever you go, turning ordinary moments into experiences.',
+  'คุณนำความสุขและการอยู่กับปัจจุบันไปทุกที่ เปลี่ยนช่วงเวลาธรรมดาให้เป็นประสบการณ์',
+  ['Se','Fi','Te','Ni'],
+  ['Warm and magnetic','Lives fully in the moment','Adaptable and generous'],
+  ['อบอุ่นและมีเสน่ห์','ใช้ชีวิตเต็มที่กับปัจจุบัน','ปรับตัวและใจกว้าง'],
+  ['Plan for the long term','Sit with hard feelings','Finish what excites you less'],
+  ['วางแผนระยะยาว','อยู่กับความรู้สึกยาก ๆ ได้','ทำสิ่งที่ตื่นเต้นน้อยลงให้จบ'],
+  ['Performer / Host','Event Manager','Sales','Designer','Hospitality Lead'],
+  'Learns through interactive, energetic, and social hands-on activities.',
+  'เรียนรู้ผ่านกิจกรรมที่มีปฏิสัมพันธ์ มีพลัง และเข้าสังคม',
+  'Playful and affectionate; loves out loud and keeps relationships lively.',
+  'ขี้เล่นและอบอุ่น รักอย่างเปิดเผยและทำให้ความสัมพันธ์มีชีวิตชีวา',
+  ['ISFJ','ISTJ','ISTP'],[52,88,55,92,80]),
+};
+const GROUP_ORDER = ['analysts','diplomats','sentinels','explorers'];
+const TYPES_BY_GROUP = { analysts:['INTJ','INTP','ENTJ','ENTP'], diplomats:['INFJ','INFP','ENFJ','ENFP'],
+  sentinels:['ISTJ','ISFJ','ESTJ','ESFJ'], explorers:['ISTP','ISFP','ESTP','ESFP'] };
+
+/* ========================= 2) STATE ======================== */
+const LS = 'mbtios.v1';
+const DEFAULT_STATE = {
+  lang:'en', mbti:null, name:'', view:'dashboard',
+  journal:[], goals:[], missions:{}, coach:[], onboarded:false,
+  settings:{ reduceMotion:false },
+};
+let state = load();
+
+function load(){
+  try{ const raw = localStorage.getItem(LS); if(raw) return {...structuredClone(DEFAULT_STATE), ...JSON.parse(raw)}; }
+  catch(e){ console.warn('load failed', e); }
+  return structuredClone(DEFAULT_STATE);
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){ console.warn('save failed', e); } }
+
+/* ========================= 3) UTILS ======================== */
+const $  = (s,r=document)=> r.querySelector(s);
+const $$ = (s,r=document)=> [...r.querySelectorAll(s)];
+const el = (tag,cls,html)=>{ const n=document.createElement(tag); if(cls) n.className=cls; if(html!=null) n.innerHTML=html; return n; };
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
+const uid = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+// deterministic hash + seeded RNG for stable "daily" values
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+function mulberry32(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const todayKey = ()=> new Date().toISOString().slice(0,10);
+
+// Daily biometric-style scores, stable per day+type, nudged by type traits
+function dailyScores(code){
+  const t = TYPES[code]; if(!t) return {energy:70,focus:70,stress:30,mood:75};
+  const rng = mulberry32(hashStr(todayKey()+code));
+  const [strat,emp,struc,adapt,drive] = t.radar;
+  const E = code[0]==='E';
+  const energy = clamp(Math.round((E?68:56) + drive*0.15 + (rng()*24-12)), 30, 99);
+  const focus  = clamp(Math.round(50 + struc*0.25 + strat*0.12 + (rng()*22-11)), 30, 99);
+  const stress = clamp(Math.round(46 - drive*0.12 + (100-adapt)*0.15 + (rng()*26-13)), 8, 82);
+  const mood   = clamp(Math.round(60 + emp*0.12 + (E?8:0) - stress*0.15 + (rng()*20-10)), 35, 99);
+  return {energy,focus,stress,mood};
+}
+// 7-day wellbeing series
+function weekSeries(code, base){
+  const out=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i);
+    const rng=mulberry32(hashStr(d.toISOString().slice(0,10)+code+'w'));
+    out.push(clamp(Math.round(base + (rng()*30-13)),20,99)); }
+  return out;
+}
+const WEEKDAYS = { en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], th:['จ.','อ.','พ.','พฤ.','ศ.','ส.','อา.'] };
+function last7Labels(){ const out=[]; const names=WEEKDAYS[state.lang]||WEEKDAYS.en;
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); out.push(names[(d.getDay()+6)%7]); } return out; }
+
+/* ========================= 4) i18n ========================= */
+const DICT = {
+en:{
+  brand_tag:'Your Personal OS', pick_type:'Pick your type', search:'Search', search_ph:'Search sections…', not_set:'Not set',
+  ob_title:'Welcome to MBTI OS', ob_sub:'Know Yourself. Grow Yourself. Work better together with insights built around your personality.',
+  ob_ask:'Do you already know your MBTI type?', ob_cta:'Select My MBTI', ob_unknown:"I'm not sure yet",
+  choose_title:'Choose your type', choose_desc:'Select one of the 16 personalities. You can change it anytime in Settings.',
+  // nav
+  nav_dashboard:'Dashboard', nav_personality:'My Personality', nav_growth:'Growth', nav_career:'Career', nav_learning:'Learning',
+  nav_relationship:'Relationship', nav_journal:'Journal', nav_goals:'Goals', nav_team:'Team', nav_coach:'AI Coach', nav_settings:'Settings', nav_more:'More',
+  sub_dashboard:'Your day at a glance', sub_personality:'Who you are, in depth', sub_growth:'Track your progress',
+  sub_career:'Roles that fit you', sub_learning:'How you learn best', sub_relationship:'Connect better with others',
+  sub_journal:'Reflect and record', sub_goals:'Turn intent into action', sub_team:'Balance and dynamics', sub_coach:'Guidance on demand', sub_settings:'Preferences and data',
+  // scores
+  energy:'Energy', focus:'Focus', stress:'Stress', mood:'Mood',
+  good_morning:'Good morning', good_afternoon:'Good afternoon', good_evening:'Good evening', friend:'friend',
+  todays_mission:"Today's mission", todays_rec:'Recommended for you', quick_actions:'Quick actions',
+  wellbeing_7:'7-day wellbeing', mission_streak:'Mission streak', days:'days', completed:'Completed', mark_done:'Mark done', done:'Done',
+  // quick actions
+  qa_journal:'New journal entry', qa_goal:'Add a goal', qa_coach:'Ask AI Coach', qa_mission:'Complete mission',
+  open:'Open', view_all:'View all',
+  // personality
+  overview:'Overview', cognitive_stack:'Cognitive function stack', strengths:'Strengths', growth_areas:'Growth areas',
+  personality_radar:'Personality radar', trait_strategy:'Strategy', trait_empathy:'Empathy', trait_structure:'Structure', trait_adaptability:'Adaptability', trait_drive:'Drive',
+  // growth
+  balance:'Cognitive balance', tips_for_you:'Growth tips', focus_score:'Focus score', energy_score:'Energy score',
+  // career
+  recommended_roles:'Recommended roles', work_style:'Work style', ideal_env:'Ideal environment',
+  // learning
+  your_style:'Your learning style', study_tips:'Study tips',
+  // relationship
+  best_matches:'Best matches', comm_tips:'Communication tips', how_you_love:'How you connect',
+  // journal
+  journal_placeholder:'What is on your mind today?', mood_today:'How do you feel?', save_entry:'Save entry',
+  no_entries:'No entries yet', no_entries_sub:'Write your first reflection to start tracking your mood over time.',
+  entries:'entries', delete:'Delete',
+  // goals
+  new_goal:'New goal', goal_placeholder:'e.g. Practice active listening', add_goal:'Add goal', no_goals:'No goals yet',
+  no_goals_sub:'Set a small, specific goal aligned with your growth areas.', in_progress:'In progress', complete:'Complete', reopen:'Reopen',
+  active:'Active', finished:'Finished',
+  // team
+  team_composition:'Team composition', add_member:'Add member', member_name:'Member name', member_type:'Type',
+  team_insight:'Team insight', no_members:'No team members', no_members_sub:'Add teammates to see personality balance and collaboration tips.',
+  collab_tips:'Collaboration tips',
+  // coach
+  coach_intro:"I'm your MBTI-aware coach. Ask about focus, stress, careers, or relationships and I'll tailor advice to your type.",
+  coach_ph:'Ask your coach…', send:'Send', coach_note:'Runs locally on rules tuned to your type. Ready to connect to a live AI model.',
+  suggest_focus:'How can I focus better?', suggest_stress:'Help me manage stress', suggest_career:'What career suits me?', suggest_relation:'Improve my relationships',
+  // settings
+  change_mbti:'Change MBTI type', change_mbti_sub:'Currently', your_name:'Your name', name_ph:'Enter your name', language:'Language',
+  reset_data:'Reset all data', reset_sub:'Clear your type, journal, goals and settings on this device.', reset_confirm:'This will erase everything. Continue?',
+  about:'About', about_text:'MBTI OS is a personal growth companion inspired by personality psychology. Insights are for reflection, not clinical diagnosis.',
+  save_changes:'Save changes', reset:'Reset',
+  // toasts
+  saved:'Saved', type_saved:'Personality set', lang_switched:'Language switched', data_reset:'All data reset',
+  entry_saved:'Journal entry saved', goal_added:'Goal added', goal_done:'Goal completed', member_added:'Team member added',
+  mission_done:'Mission complete', welcome_toast:'Welcome to your OS',
+  shortcuts:'Shortcuts', kb_hint:'Press ? for keyboard shortcuts',
+},
+th:{
+  brand_tag:'ระบบปฏิบัติการของคุณ', pick_type:'เลือกบุคลิกของคุณ', search:'ค้นหา', search_ph:'ค้นหาหัวข้อ…', not_set:'ยังไม่ตั้งค่า',
+  ob_title:'ยินดีต้อนรับสู่ MBTI OS', ob_sub:'รู้จักตัวเอง พัฒนาตัวเอง และทำงานร่วมกับผู้อื่นได้ดีขึ้น ด้วยข้อมูลเชิงลึกที่ออกแบบรอบบุคลิกของคุณ',
+  ob_ask:'คุณรู้ประเภท MBTI ของตัวเองแล้วหรือยัง?', ob_cta:'เลือก MBTI ของฉัน', ob_unknown:'ยังไม่แน่ใจ',
+  choose_title:'เลือกประเภทของคุณ', choose_desc:'เลือกหนึ่งใน 16 บุคลิก เปลี่ยนได้ทุกเมื่อในการตั้งค่า',
+  nav_dashboard:'แดชบอร์ด', nav_personality:'บุคลิกของฉัน', nav_growth:'การเติบโต', nav_career:'อาชีพ', nav_learning:'การเรียนรู้',
+  nav_relationship:'ความสัมพันธ์', nav_journal:'ไดอารี่', nav_goals:'เป้าหมาย', nav_team:'ทีม', nav_coach:'AI โค้ช', nav_settings:'ตั้งค่า', nav_more:'เพิ่มเติม',
+  sub_dashboard:'ภาพรวมวันนี้', sub_personality:'ตัวตนของคุณแบบเจาะลึก', sub_growth:'ติดตามความก้าวหน้า',
+  sub_career:'บทบาทที่เหมาะกับคุณ', sub_learning:'วิธีเรียนรู้ที่ดีที่สุด', sub_relationship:'เชื่อมโยงกับผู้อื่นได้ดีขึ้น',
+  sub_journal:'ทบทวนและบันทึก', sub_goals:'เปลี่ยนความตั้งใจเป็นการกระทำ', sub_team:'สมดุลและพลวัตของทีม', sub_coach:'คำแนะนำเมื่อคุณต้องการ', sub_settings:'การตั้งค่าและข้อมูล',
+  energy:'พลังงาน', focus:'สมาธิ', stress:'ความเครียด', mood:'อารมณ์',
+  good_morning:'สวัสดีตอนเช้า', good_afternoon:'สวัสดีตอนบ่าย', good_evening:'สวัสดีตอนเย็น', friend:'เพื่อน',
+  todays_mission:'ภารกิจวันนี้', todays_rec:'แนะนำสำหรับคุณ', quick_actions:'ทางลัด',
+  wellbeing_7:'สุขภาวะ 7 วัน', mission_streak:'ทำภารกิจต่อเนื่อง', days:'วัน', completed:'สำเร็จแล้ว', mark_done:'ทำเสร็จ', done:'เสร็จ',
+  qa_journal:'เขียนไดอารี่', qa_goal:'เพิ่มเป้าหมาย', qa_coach:'ถาม AI โค้ช', qa_mission:'ทำภารกิจให้เสร็จ',
+  open:'เปิด', view_all:'ดูทั้งหมด',
+  overview:'ภาพรวม', cognitive_stack:'ลำดับฟังก์ชันการคิด', strengths:'จุดแข็ง', growth_areas:'สิ่งที่ควรพัฒนา',
+  personality_radar:'เรดาร์บุคลิก', trait_strategy:'กลยุทธ์', trait_empathy:'ความเห็นอกเห็นใจ', trait_structure:'ความเป็นระบบ', trait_adaptability:'การปรับตัว', trait_drive:'แรงขับ',
+  balance:'สมดุลการคิด', tips_for_you:'เคล็ดลับการเติบโต', focus_score:'คะแนนสมาธิ', energy_score:'คะแนนพลังงาน',
+  recommended_roles:'บทบาทที่แนะนำ', work_style:'สไตล์การทำงาน', ideal_env:'สภาพแวดล้อมที่เหมาะสม',
+  your_style:'สไตล์การเรียนรู้ของคุณ', study_tips:'เคล็ดลับการเรียน',
+  best_matches:'คู่ที่เข้ากันได้ดี', comm_tips:'เคล็ดลับการสื่อสาร', how_you_love:'วิธีที่คุณเชื่อมโยง',
+  journal_placeholder:'วันนี้คุณคิดอะไรอยู่?', mood_today:'วันนี้รู้สึกอย่างไร?', save_entry:'บันทึก',
+  no_entries:'ยังไม่มีบันทึก', no_entries_sub:'เขียนบันทึกแรกเพื่อเริ่มติดตามอารมณ์ของคุณ',
+  entries:'บันทึก', delete:'ลบ',
+  new_goal:'เป้าหมายใหม่', goal_placeholder:'เช่น ฝึกการฟังอย่างตั้งใจ', add_goal:'เพิ่มเป้าหมาย', no_goals:'ยังไม่มีเป้าหมาย',
+  no_goals_sub:'ตั้งเป้าหมายเล็ก ๆ ที่ชัดเจนให้สอดคล้องกับสิ่งที่คุณอยากพัฒนา', in_progress:'กำลังทำ', complete:'ทำเสร็จ', reopen:'เปิดอีกครั้ง',
+  active:'กำลังทำ', finished:'เสร็จแล้ว',
+  team_composition:'องค์ประกอบทีม', add_member:'เพิ่มสมาชิก', member_name:'ชื่อสมาชิก', member_type:'ประเภท',
+  team_insight:'ข้อมูลเชิงลึกของทีม', no_members:'ยังไม่มีสมาชิกทีม', no_members_sub:'เพิ่มเพื่อนร่วมทีมเพื่อดูสมดุลบุคลิกและเคล็ดลับการทำงานร่วมกัน',
+  collab_tips:'เคล็ดลับการทำงานร่วมกัน',
+  coach_intro:'ฉันคือโค้ชที่เข้าใจ MBTI ของคุณ ถามเรื่องสมาธิ ความเครียด อาชีพ หรือความสัมพันธ์ได้เลย ฉันจะปรับคำแนะนำให้เข้ากับประเภทของคุณ',
+  coach_ph:'ถามโค้ชของคุณ…', send:'ส่ง', coach_note:'ทำงานในเครื่องด้วยกฎที่ปรับตามประเภทของคุณ พร้อมเชื่อมต่อกับโมเดล AI จริง',
+  suggest_focus:'ทำอย่างไรให้มีสมาธิมากขึ้น?', suggest_stress:'ช่วยจัดการความเครียด', suggest_career:'อาชีพไหนเหมาะกับฉัน?', suggest_relation:'พัฒนาความสัมพันธ์ของฉัน',
+  change_mbti:'เปลี่ยนประเภท MBTI', change_mbti_sub:'ปัจจุบัน', your_name:'ชื่อของคุณ', name_ph:'กรอกชื่อของคุณ', language:'ภาษา',
+  reset_data:'รีเซ็ตข้อมูลทั้งหมด', reset_sub:'ล้างประเภท ไดอารี่ เป้าหมาย และการตั้งค่าในอุปกรณ์นี้', reset_confirm:'การกระทำนี้จะลบทุกอย่าง ดำเนินการต่อ?',
+  about:'เกี่ยวกับ', about_text:'MBTI OS คือเพื่อนคู่คิดเพื่อการเติบโตส่วนบุคคล ได้แรงบันดาลใจจากจิตวิทยาบุคลิกภาพ ข้อมูลนี้ใช้เพื่อการทบทวนตนเอง ไม่ใช่การวินิจฉัยทางคลินิก',
+  save_changes:'บันทึกการเปลี่ยนแปลง', reset:'รีเซ็ต',
+  saved:'บันทึกแล้ว', type_saved:'ตั้งค่าบุคลิกแล้ว', lang_switched:'เปลี่ยนภาษาแล้ว', data_reset:'รีเซ็ตข้อมูลทั้งหมดแล้ว',
+  entry_saved:'บันทึกไดอารี่แล้ว', goal_added:'เพิ่มเป้าหมายแล้ว', goal_done:'ทำเป้าหมายสำเร็จ', member_added:'เพิ่มสมาชิกทีมแล้ว',
+  mission_done:'ทำภารกิจสำเร็จ', welcome_toast:'ยินดีต้อนรับสู่ระบบของคุณ',
+  shortcuts:'คีย์ลัด', kb_hint:'กด ? เพื่อดูคีย์ลัด',
+},
+};
+const L = ()=> state.lang;
+const t = k => (DICT[L()] && DICT[L()][k]) || DICT.en[k] || k;
+const tf = obj => (obj && (obj[L()] || obj.en)) || '';
+
+// Missions per type (localised)
+const MISSIONS = {
+  en:['Write down one idea you want to test this week.','Reach out to someone you have not spoken to in a while.',
+    'Take a 20-minute walk with no phone.','Finish one task you have been avoiding.','Ask a colleague for honest feedback.',
+    'Spend 15 minutes on something purely creative.','Say no to one thing that drains you.'],
+  th:['จดไอเดียหนึ่งอย่างที่อยากลองทดสอบสัปดาห์นี้','ทักหาใครสักคนที่ไม่ได้คุยกันมานาน',
+    'เดินเล่น 20 นาทีโดยไม่แตะโทรศัพท์','ทำงานที่หลีกเลี่ยงมาตลอดให้เสร็จหนึ่งอย่าง','ขอฟีดแบ็กตรง ๆ จากเพื่อนร่วมงาน',
+    'ใช้เวลา 15 นาทีทำอะไรที่สร้างสรรค์ล้วน ๆ','ปฏิเสธสิ่งหนึ่งที่ทำให้คุณหมดพลัง'],
+};
+function todaysMission(){ const idx = hashStr(todayKey()+(state.mbti||'')) % 7; return (MISSIONS[L()]||MISSIONS.en)[idx]; }
+
+/* ===================== 5) ROUTER / NAV ===================== */
+const NAV = [
+  {id:'dashboard',    icon:'layout-dashboard'},
+  {id:'personality',  icon:'user-round'},
+  {id:'growth',       icon:'trending-up'},
+  {id:'career',       icon:'briefcase'},
+  {id:'learning',     icon:'graduation-cap'},
+  {id:'relationship', icon:'heart-handshake'},
+  {id:'journal',      icon:'notebook-pen'},
+  {id:'goals',        icon:'target'},
+  {id:'team',         icon:'users'},
+  {id:'coach',        icon:'sparkles'},
+  {id:'settings',     icon:'settings-2'},
+];
+const BOTTOM_NAV = ['dashboard','personality','growth','journal','coach'];
+
+const chartReg = {};
+function destroyCharts(){ for(const k in chartReg){ try{ chartReg[k].destroy(); }catch(e){} delete chartReg[k]; } }
+
+let iconRaf = 0;
+function refreshIcons(){ // batch lucide icon creation
+  cancelAnimationFrame(iconRaf);
+  iconRaf = requestAnimationFrame(()=>{ if(window.lucide) lucide.createIcons(); });
+}
+
+function buildNav(){
+  const nav = $('#nav'); nav.innerHTML='';
+  NAV.forEach(item=>{
+    const b = el('button','nav-item');
+    b.dataset.view = item.id;
+    b.setAttribute('role','link');
+    b.innerHTML = `<svg data-lucide="${item.icon}"></svg><span class="lbl">${t('nav_'+item.id)}</span>`;
+    b.addEventListener('click', ()=> go(item.id));
+    nav.appendChild(b);
+  });
+  const bn = $('#botnav'); bn.innerHTML='';
+  BOTTOM_NAV.forEach(id=>{
+    const item = NAV.find(n=>n.id===id);
+    const b = el('button','bn'); b.dataset.view=id;
+    b.innerHTML = `<svg data-lucide="${item.icon}"></svg><span>${t('nav_'+id)}</span>`;
+    b.addEventListener('click', ()=> go(id));
+    bn.appendChild(b);
+  });
+  refreshIcons();
+}
+
+function setActiveNav(id){
+  $$('.nav-item').forEach(n=>{ const on=n.dataset.view===id; n.classList.toggle('active',on); n.setAttribute('aria-current', on?'page':'false'); });
+  $$('.botnav .bn').forEach(n=> n.classList.toggle('active', n.dataset.view===id));
+}
+
+function go(id){
+  if(!VIEWS[id]) id='dashboard';
+  state.view = id; save();
+  setActiveNav(id);
+  $('#view-title').textContent = t('nav_'+id);
+  $('#view-sub').textContent = t('sub_'+id);
+  const host = $('#view');
+  destroyCharts();
+  // skeleton flash for perceived performance
+  host.innerHTML = skeleton();
+  requestAnimationFrame(()=>{
+    const {html,mount} = VIEWS[id]();
+    host.innerHTML = html;
+    refreshIcons();
+    if(mount) mount(host);
+    reveal(host);
+    host.focus({preventScroll:true});
+    window.scrollTo({top:0,behavior:'auto'});
+  });
+}
+
+function reveal(host){
+  if(!window.gsap || prefersReduced()) return;
+  const items = [...host.children].slice(0,10);
+  gsap.fromTo(items, {y:16, opacity:0}, {y:0, opacity:1, duration:.5, stagger:.05, ease:'power2.out', clearProps:'transform'});
+}
+const prefersReduced = ()=> window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function skeleton(){
+  return `<div class="grid g-4" style="margin-bottom:18px">
+    ${'<div class="card"><div class="skel" style="height:16px;width:50%"></div><div class="skel" style="height:34px;width:70%;margin-top:16px"></div></div>'.repeat(4)}
+  </div>
+  <div class="grid g-2"><div class="card" style="height:280px"><div class="skel" style="height:100%"></div></div>
+  <div class="card" style="height:280px"><div class="skel" style="height:100%"></div></div></div>`;
+}
+
+/* apply i18n to static chrome + fonts */
+function applyLang(){
+  document.documentElement.setAttribute('lang', state.lang);
+  document.documentElement.setAttribute('data-lang', state.lang);
+  $$('[data-i18n]').forEach(n=> n.textContent = t(n.dataset.i18n));
+  $$('[data-i18n-ph]').forEach(n=> n.placeholder = t(n.dataset.i18nPh));
+  $$('[data-lang-set]').forEach(b=> b.classList.toggle('on', b.dataset.langSet===state.lang));
+}
+
+function setLang(lang){
+  if(lang===state.lang) return;
+  state.lang = lang; save();
+  applyLang();
+  buildNav();
+  updateSidebarCard();
+  buildFab();
+  if(!$('#app').hidden){ $('#view-title').textContent=t('nav_'+state.view); $('#view-sub').textContent=t('sub_'+state.view); go(state.view); }
+  toast(t('lang_switched'), 'info', 'languages');
+}
+
+function updateSidebarCard(){
+  const code = state.mbti;
+  $('#mini-type').textContent = code ? code[0]+code[3] : '–';
+  $('#mini-code').textContent = code || t('not_set');
+  $('#mini-role').textContent = code ? tf(TYPES[code].name) : t('pick_type');
+  $('#profile-btn').textContent = (state.name||t('friend'))[0].toUpperCase();
+}
+
+/* ========================= 6) VIEWS ======================== */
+
+// ---- reusable components ----
+function ring(pct, label){
+  const r=52, c=2*Math.PI*r, off=c*(1-pct/100);
+  return `<div class="ring" data-ring="${pct}">
+    <svg width="118" height="118" viewBox="0 0 118 118">
+      <circle class="track" cx="59" cy="59" r="${r}"></circle>
+      <circle class="prog" cx="59" cy="59" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${off}"></circle>
+    </svg>
+    <div class="mid"><b class="ring-num">0</b><span>${label}</span></div>
+  </div>`;
+}
+function animRings(host){
+  $$('.ring', host).forEach(rg=>{
+    const pct = +rg.dataset.ring, prog = $('.prog', rg), num = $('.ring-num', rg);
+    const off = +prog.dataset.off;
+    if(prefersReduced()){ prog.style.strokeDashoffset=off; num.textContent=pct; return; }
+    gsap.to(prog, {strokeDashoffset:off, duration:1.1, ease:'power2.out'});
+    gsap.to({v:0}, {v:pct, duration:1.1, ease:'power2.out', onUpdate(){ num.textContent=Math.round(this.targets()[0].v); }});
+  });
+}
+function animBars(host){
+  $$('.bar > i', host).forEach(b=>{ const w=b.dataset.w||'0'; requestAnimationFrame(()=> b.style.width=w+'%'); });
+}
+const scoreTile = (icon,label,val,unit='')=>`
+  <div class="score"><div class="sh"><svg data-lucide="${icon}"></svg>${label}</div>
+  <div class="sv">${val}${unit}</div><div class="bar"><i data-w="${val}"></i></div></div>`;
+
+const statCard = (icon,val,label,trend)=>`
+  <div class="card hover stat"><div class="top"><div class="ic"><svg data-lucide="${icon}"></svg></div>
+  ${trend?`<span class="trend ${trend.dir}"><svg data-lucide="${trend.dir==='up'?'trending-up':'trending-down'}" style="width:14px;height:14px"></svg>${trend.v}</span>`:''}</div>
+  <div class="val">${val}</div><div class="lbl">${label}</div></div>`;
+
+const listItem = (icon,title,sub)=>`
+  <div class="lrow"><div class="lic"><svg data-lucide="${icon}"></svg></div>
+  <div class="lmain"><b>${esc(title)}</b><span>${esc(sub)}</span></div></div>`;
+
+function greeting(){ const h=new Date().getHours(); return h<12?t('good_morning'):h<18?t('good_afternoon'):t('good_evening'); }
+
+// ---------- DASHBOARD ----------
+function vDashboard(){
+  const code=state.mbti, ty=TYPES[code], s=dailyScores(code);
+  const missionKey=todayKey(), missionDone=!!state.missions[missionKey];
+  const name = state.name || t('friend');
+  const html = `
+  <div class="card hero" style="margin-bottom:18px">
+    <div style="display:flex;flex-wrap:wrap;gap:26px;justify-content:space-between;align-items:flex-start">
+      <div style="min-width:240px">
+        <div class="greet">${greeting()}, <b>${esc(name)}</b> 👋</div>
+        <div class="type-xl">${code}</div>
+        <div class="pname">${tf(ty.name)} · <span style="color:var(--text-2)">${tf(GROUPS[ty.group].name)}</span></div>
+        <p style="color:var(--text-2);max-width:44ch;margin-top:10px;font-size:14px">${tf(ty.blurb)}</p>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="hero-scores">
+          ${scoreTile('battery-charging',t('energy'),s.energy,'%')}
+          ${scoreTile('crosshair',t('focus'),s.focus,'%')}
+          ${scoreTile('activity',t('stress'),s.stress,'%')}
+          ${scoreTile('smile',t('mood'),s.mood,'%')}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-3" style="margin-bottom:18px">
+    <div class="card mission hover span-2">
+      <div class="card-h"><h3><svg data-lucide="flag"></svg>${t('todays_mission')}</h3>
+      <span class="pill accent"><svg data-lucide="flame"></svg>${missionStreak()} ${t('days')}</span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="m-check ${missionDone?'done':''}" id="mission-check" aria-label="${t('mark_done')}"><svg data-lucide="check"></svg></button>
+        <div style="flex:1"><div style="font-size:15px;font-weight:600">${esc(todaysMission())}</div>
+        <div style="font-size:12.5px;color:var(--text-2);margin-top:2px">${missionDone?t('completed'):t('mark_done')}</div></div>
+      </div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="sparkles"></svg>${t('todays_rec')}</h3></div>
+      <p style="font-size:14px;color:var(--text-2)">${tf({en:ty.growth.en[0],th:ty.growth.th[0]})}.</p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="__mbtios.go('growth')">${t('open')} ${t('nav_growth')}</button>
+    </div>
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="line-chart"></svg>${t('wellbeing_7')}</h3><span class="sub">${t('mood')} · ${t('focus')}</span></div>
+      <div class="chartbox h-line"><canvas id="c-well"></canvas></div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="pie-chart"></svg>${t('energy')} · ${t('focus')} · ${t('mood')}</h3></div>
+      <div class="chartbox h-donut"><canvas id="c-dist"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card hover">
+    <div class="card-h"><h3><svg data-lucide="zap"></svg>${t('quick_actions')}</h3></div>
+    <div class="grid g-4">
+      ${qaBtn('notebook-pen',t('qa_journal'),'journal')}
+      ${qaBtn('target',t('qa_goal'),'goals')}
+      ${qaBtn('sparkles',t('qa_coach'),'coach')}
+      ${qaBtn('user-round',t('nav_personality'),'personality')}
+    </div>
+  </div>`;
+
+  const mount = host=>{
+    animBars(host);
+    // mission toggle
+    $('#mission-check',host).addEventListener('click', e=>{
+      const key=todayKey(); state.missions[key]=!state.missions[key]; save();
+      e.currentTarget.classList.toggle('done', state.missions[key]);
+      $('.m-check',host).nextElementSibling.querySelector('div:last-child').textContent = state.missions[key]?t('completed'):t('mark_done');
+      if(state.missions[key]) toast(t('mission_done'),'ok','flag');
+      $('.mission .pill',host).innerHTML = `<svg data-lucide="flame"></svg>${missionStreak()} ${t('days')}`; refreshIcons();
+    });
+    // charts
+    const wk=weekSeries(code, s.mood), fk=weekSeries(code, s.focus);
+    chartReg.well = new Chart($('#c-well',host), lineCfg(last7Labels(), [
+      {label:t('mood'), data:wk, color:'#FF7A00'},
+      {label:t('focus'), data:fk, color:'#FF9D3D', dash:true},
+    ]));
+    chartReg.dist = new Chart($('#c-dist',host), donutCfg(
+      [t('energy'),t('focus'),t('mood'),t('stress')],
+      [s.energy,s.focus,s.mood,s.stress],
+      ['#FF7A00','#FF9D3D','#22C55E','#EF4444']
+    ));
+  };
+  return {html, mount};
+}
+const qaBtn=(icon,label,view)=>`<button class="chip" style="justify-content:flex-start;padding:14px;cursor:pointer" onclick="__mbtios.go('${view}')">
+  <svg data-lucide="${icon}"></svg><span style="text-align:left">${label}</span></button>`;
+
+function missionStreak(){
+  let n=0; const d=new Date();
+  for(let i=0;i<60;i++){ const k=d.toISOString().slice(0,10); if(state.missions[k]) n++; else if(i>0) break; d.setDate(d.getDate()-1); }
+  return n;
+}
+
+// ---------- PERSONALITY ----------
+function vPersonality(){
+  const code=state.mbti, ty=TYPES[code], g=GROUPS[ty.group];
+  const html=`
+  <div class="page-head"><span class="eyebrow"><svg data-lucide="fingerprint"></svg>${code}</span>
+    <h1>${tf(ty.name)}</h1><p>${tf(ty.blurb)}</p></div>
+
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="radar"></svg>${t('personality_radar')}</h3>
+      <span class="pill" style="border-color:${g.color}55;color:${g.color}">${tf(g.name)}</span></div>
+      <div class="chartbox h-radar"><canvas id="c-radar"></canvas></div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="layers"></svg>${t('cognitive_stack')}</h3></div>
+      <div class="func">
+        ${ty.stack.map((f,i)=>`<div class="f"><div class="badge b${i}">${f}</div>
+          <div class="ftext"><b>${tf(FUNC[f])}</b><span>${f}</span></div>
+          <span class="frole">${tf(ROLES[i])}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-2">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="gem"></svg>${t('strengths')}</h3></div>
+      <div class="chips" style="flex-direction:column;align-items:stretch">
+        ${ty.strengths[L()].map(s=>`<div class="chip"><svg data-lucide="check-circle-2"></svg>${esc(s)}</div>`).join('')}
+      </div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="sprout"></svg>${t('growth_areas')}</h3></div>
+      <div class="chips" style="flex-direction:column;align-items:stretch">
+        ${ty.growth[L()].map(s=>`<div class="chip"><svg data-lucide="arrow-up-right"></svg>${esc(s)}</div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  const mount=host=>{
+    const labels=[t('trait_strategy'),t('trait_empathy'),t('trait_structure'),t('trait_adaptability'),t('trait_drive')];
+    chartReg.radar = new Chart($('#c-radar',host), radarCfg(labels, ty.radar));
+  };
+  return {html, mount};
+}
+
+// ---------- GROWTH ----------
+function vGrowth(){
+  const code=state.mbti, ty=TYPES[code], s=dailyScores(code);
+  const fnStrength=[95,78,55,38];
+  const html=`
+  <div class="grid g-4" style="margin-bottom:18px">
+    <div class="card hover" style="align-items:center;text-align:center;display:flex;flex-direction:column;gap:10px">
+      ${ring(s.focus,t('focus'))}<div class="lbl" style="color:var(--text-2);font-size:12.5px">${t('focus_score')}</div></div>
+    <div class="card hover" style="align-items:center;text-align:center;display:flex;flex-direction:column;gap:10px">
+      ${ring(s.energy,t('energy'))}<div class="lbl" style="color:var(--text-2);font-size:12.5px">${t('energy_score')}</div></div>
+    ${statCard('flame',missionStreak(),t('mission_streak'),{dir:'up',v:'+1'})}
+    ${statCard('check-circle-2',state.goals.filter(g=>g.done).length,t('finished')+' '+t('nav_goals').toLowerCase(),null)}
+  </div>
+
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover span-2">
+      <div class="card-h"><h3><svg data-lucide="line-chart"></svg>${t('wellbeing_7')}</h3></div>
+      <div class="chartbox h-line"><canvas id="c-growth"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid g-2">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="layers"></svg>${t('balance')}</h3></div>
+      ${ty.stack.map((f,i)=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px">
+        <span>${tf(FUNC[f])} <b style="color:var(--text-2)">${f}</b></span><span style="color:var(--text-2)">${fnStrength[i]}%</span></div>
+        <div class="bar"><i data-w="${fnStrength[i]}"></i></div></div>`).join('')}
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="sprout"></svg>${t('tips_for_you')}</h3></div>
+      <div class="rowlist">
+        ${ty.growth[L()].map((s,i)=>listItem(['compass','anchor','flag'][i]||'dot',s,tf(ty.name))).join('')}
+      </div>
+    </div>
+  </div>`;
+  const mount=host=>{
+    animRings(host); animBars(host);
+    chartReg.growth = new Chart($('#c-growth',host), lineCfg(last7Labels(), [
+      {label:t('mood'), data:weekSeries(code,s.mood), color:'#FF7A00'},
+      {label:t('energy'), data:weekSeries(code,s.energy), color:'#22C55E', dash:true},
+    ]));
+  };
+  return {html, mount};
+}
+
+// ---------- CAREER ----------
+function vCareer(){
+  const code=state.mbti, ty=TYPES[code];
+  const rng=mulberry32(hashStr(code+'career'));
+  const fits = ty.careers.map(c=>({c, v: clamp(Math.round(78+rng()*20),70,98)})).sort((a,b)=>b.v-a.v);
+  const html=`
+  <div class="page-head"><span class="eyebrow"><svg data-lucide="briefcase"></svg>${code}</span>
+    <h1>${t('recommended_roles')}</h1><p>${t('sub_career')} — ${tf(ty.name)}</p></div>
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="target"></svg>${t('recommended_roles')}</h3></div>
+      ${fits.map(f=>`<div style="margin-bottom:15px"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:7px">
+        <span>${esc(f.c)}</span><span style="color:var(--accent);font-weight:700">${f.v}%</span></div>
+        <div class="bar"><i data-w="${f.v}"></i></div></div>`).join('')}
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="briefcase"></svg>${t('work_style')}</h3></div>
+      <p style="color:var(--text-2);font-size:14px;line-height:1.7">${tf(ty.learn)}</p>
+      <div style="height:1px;background:var(--line);margin:18px 0"></div>
+      <h3 style="font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px"><svg data-lucide="building-2" style="width:16px;height:16px;color:var(--accent)"></svg>${t('ideal_env')}</h3>
+      <div class="chips">${idealEnv(code).map(e=>`<div class="chip"><svg data-lucide="dot"></svg>${e}</div>`).join('')}</div>
+    </div>
+  </div>
+  <div class="card hover">
+    <div class="card-h"><h3><svg data-lucide="gem"></svg>${t('strengths')} → ${t('nav_career')}</h3></div>
+    <div class="chips">${ty.strengths[L()].map(s=>`<div class="chip"><svg data-lucide="check-circle-2"></svg>${esc(s)}</div>`).join('')}</div>
+  </div>`;
+  return {html, mount:host=>animBars(host)};
+}
+function idealEnv(code){
+  const E=code[0]==='E', J=code[3]==='J', N=code[1]==='N';
+  const en=[ E?'Collaborative team':'Focused deep work', J?'Clear structure':'Flexible pace',
+    N?'Big-picture vision':'Concrete goals', 'Autonomy', 'Meaningful impact'];
+  const th=[ E?'ทีมที่ทำงานร่วมกัน':'งานลึกที่มีสมาธิ', J?'โครงสร้างชัดเจน':'จังหวะยืดหยุ่น',
+    N?'วิสัยทัศน์ภาพใหญ่':'เป้าหมายที่จับต้องได้', 'มีอิสระในการตัดสินใจ', 'สร้างผลกระทบที่มีความหมาย'];
+  return L()==='th'?th:en;
+}
+
+// ---------- LEARNING ----------
+function vLearning(){
+  const code=state.mbti, ty=TYPES[code];
+  const N=code[1]==='N';
+  const modes = N ? [40,20,25,15] : [22,42,18,18]; // Concept, Doing, Discussion, Reading
+  const html=`
+  <div class="page-head"><span class="eyebrow"><svg data-lucide="graduation-cap"></svg>${code}</span>
+    <h1>${t('your_style')}</h1><p>${t('sub_learning')}</p></div>
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="graduation-cap"></svg>${t('your_style')}</h3></div>
+      <p style="color:var(--text-2);font-size:14.5px;line-height:1.75">${tf(ty.learn)}</p>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="pie-chart"></svg>${t('your_style')}</h3></div>
+      <div class="chartbox h-donut"><canvas id="c-learn"></canvas></div>
+    </div>
+  </div>
+  <div class="card hover">
+    <div class="card-h"><h3><svg data-lucide="lightbulb"></svg>${t('study_tips')}</h3></div>
+    <div class="rowlist">
+      ${studyTips(code).map((s,i)=>listItem(['book-open','pen-tool','users','repeat'][i%4],s,'')).join('')}
+    </div>
+  </div>`;
+  const mount=host=>{
+    const labels = L()==='th'?['แนวคิด','ลงมือทำ','พูดคุย','อ่าน']:['Concept','Doing','Discussion','Reading'];
+    chartReg.learn = new Chart($('#c-learn',host), donutCfg(labels, modes, ['#FF7A00','#FF9D3D','#22C55E','#38BDF8']));
+  };
+  return {html, mount};
+}
+function studyTips(code){
+  const N=code[1]==='N', P=code[3]==='P';
+  const en=[ N?'Start from the big idea, then fill in details.':'Anchor learning in concrete examples first.',
+    'Teach it back to someone in your own words.', P?'Use flexible sprints instead of rigid schedules.':'Block fixed study times and protect them.',
+    'Review a little every day to beat forgetting.'];
+  const th=[ N?'เริ่มจากภาพใหญ่ก่อน แล้วค่อยเติมรายละเอียด':'ยึดการเรียนรู้กับตัวอย่างที่จับต้องได้ก่อน',
+    'ลองสอนกลับให้คนอื่นด้วยคำพูดของตัวเอง', P?'ใช้ช่วงสั้น ๆ ที่ยืดหยุ่นแทนตารางที่ตายตัว':'กำหนดเวลาเรียนที่แน่นอนและปกป้องมันไว้',
+    'ทบทวนวันละนิดเพื่อสู้กับการลืม'];
+  return L()==='th'?th:en;
+}
+
+// ---------- RELATIONSHIP ----------
+function vRelationship(){
+  const code=state.mbti, ty=TYPES[code];
+  const html=`
+  <div class="page-head"><span class="eyebrow"><svg data-lucide="heart-handshake"></svg>${code}</span>
+    <h1>${t('nav_relationship')}</h1><p>${t('sub_relationship')}</p></div>
+  <div class="grid g-3" style="margin-bottom:18px">
+    ${ty.best.map(m=>{ const mt=TYPES[m], g=GROUPS[mt.group]; return `
+      <button class="card hover" style="text-align:left;cursor:pointer" onclick="__mbtios.previewType('${m}')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div class="mini-avatar" style="width:44px;height:44px;border-radius:13px;font-size:14px">${m[0]}${m[3]}</div>
+          <div><b style="font-size:16px;letter-spacing:.02em">${m}</b><div style="font-size:12px;color:var(--text-2)">${tf(mt.name)}</div></div>
+        </div>
+        <span class="pill" style="border-color:${g.color}55;color:${g.color}">${tf(g.name)}</span>
+        <p style="font-size:13px;color:var(--text-2);margin-top:12px">${tf(mt.tag)}</p>
+      </button>`; }).join('')}
+  </div>
+  <div class="grid g-2">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="heart"></svg>${t('how_you_love')}</h3></div>
+      <p style="color:var(--text-2);font-size:14.5px;line-height:1.75">${tf(ty.love)}</p>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="messages-square"></svg>${t('comm_tips')}</h3></div>
+      <div class="rowlist">${commTips(code).map((s,i)=>listItem(['ear','heart-handshake','message-circle'][i%3],s,'')).join('')}</div>
+    </div>
+  </div>`;
+  return {html};
+}
+function commTips(code){
+  const F=code[2]==='F', E=code[0]==='E';
+  const en=[ F?'Balance empathy with honest, direct feedback.':'Pair logic with acknowledging feelings.',
+    E?'Leave space for quieter people to speak.':'Share your inner thoughts more openly.',
+    'Assume good intent and ask before reacting.'];
+  const th=[ F?'สมดุลความเห็นอกเห็นใจกับฟีดแบ็กที่ตรงและจริงใจ':'จับคู่เหตุผลกับการยอมรับความรู้สึกของอีกฝ่าย',
+    E?'เปิดพื้นที่ให้คนเงียบ ๆ ได้พูดบ้าง':'แบ่งปันความคิดภายในให้เปิดเผยมากขึ้น',
+    'คิดว่าอีกฝ่ายหวังดี และถามก่อนจะตอบโต้'];
+  return L()==='th'?th:en;
+}
+
+// ---------- JOURNAL ----------
+const MOODS=[{e:'😞',v:1,k:'low'},{e:'😐',v:2,k:'meh'},{e:'🙂',v:3,k:'ok'},{e:'😄',v:4,k:'good'},{e:'🤩',v:5,k:'great'}];
+let draftMood=3;
+function vJournal(){
+  draftMood=3;
+  const entries=[...state.journal].reverse();
+  const html=`
+  <div class="page-head"><h1>${t('nav_journal')}</h1><p>${t('sub_journal')}</p></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h3><svg data-lucide="notebook-pen"></svg>${t('mood_today')}</h3></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px" id="mood-row">
+      ${MOODS.map(m=>`<button class="mood-btn" data-mood="${m.v}" aria-label="mood ${m.v}" style="font-size:24px;width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);transition:all .2s">${m.e}</button>`).join('')}
+    </div>
+    <textarea id="journal-text" rows="3" placeholder="${t('journal_placeholder')}" style="width:100%;background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:14px;resize:vertical;outline:none;font-size:14.5px"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn btn-primary" id="journal-save"><svg data-lucide="save"></svg>${t('save_entry')}</button></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h3><svg data-lucide="history"></svg>${t('nav_journal')}</h3><span class="sub">${state.journal.length} ${t('entries')}</span></div>
+    <div id="journal-list">${entries.length?entries.map(journalRow).join(''):emptyState('feather',t('no_entries'),t('no_entries_sub'))}</div>
+  </div>`;
+  const mount=host=>{
+    const setMood=v=>{ draftMood=v; $$('.mood-btn',host).forEach(b=>{ const on=+b.dataset.mood===v;
+      b.style.borderColor=on?'var(--accent)':'var(--line)'; b.style.background=on?'var(--accent-soft)':'rgba(255,255,255,.02)'; b.style.transform=on?'translateY(-3px)':'none'; }); };
+    $$('.mood-btn',host).forEach(b=> b.addEventListener('click',()=>setMood(+b.dataset.mood)));
+    setMood(3);
+    $('#journal-save',host).addEventListener('click',()=>{
+      const text=$('#journal-text',host).value.trim(); if(!text){ $('#journal-text',host).focus(); return; }
+      state.journal.push({id:uid(),text,mood:draftMood,ts:Date.now()}); save();
+      toast(t('entry_saved'),'ok','notebook-pen'); go('journal');
+    });
+    $$('[data-del]',host).forEach(b=> b.addEventListener('click',()=>{
+      state.journal=state.journal.filter(e=>e.id!==b.dataset.del); save(); go('journal');
+    }));
+  };
+  return {html, mount};
+}
+function journalRow(e){
+  const m=MOODS.find(x=>x.v===e.mood)||MOODS[2];
+  const d=new Date(e.ts).toLocaleDateString(L()==='th'?'th-TH':'en-US',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  return `<div class="lrow"><div class="lic" style="background:var(--accent-soft);font-size:20px">${m.e}</div>
+    <div class="lmain"><b style="font-weight:500;white-space:normal">${esc(e.text)}</b><span>${d}</span></div>
+    <button class="modal-close" data-del="${e.id}" aria-label="${t('delete')}" style="width:32px;height:32px"><svg data-lucide="trash-2" style="width:15px;height:15px"></svg></button></div>`;
+}
+
+// ---------- GOALS ----------
+function vGoals(){
+  const active=state.goals.filter(g=>!g.done), done=state.goals.filter(g=>g.done);
+  const pct = state.goals.length? Math.round(done.length/state.goals.length*100):0;
+  const html=`
+  <div class="page-head"><h1>${t('nav_goals')}</h1><p>${t('sub_goals')}</p></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h3><svg data-lucide="target"></svg>${t('new_goal')}</h3>
+      ${state.goals.length?`<span class="pill accent">${pct}% ${t('completed')}</span>`:''}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="goal-input" type="text" placeholder="${t('goal_placeholder')}" style="flex:1;min-width:200px;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:0 15px;height:46px;outline:none;font-size:14.5px" />
+      <button class="btn btn-primary" id="goal-add"><svg data-lucide="plus"></svg>${t('add_goal')}</button>
+    </div>
+    ${state.goals.length?`<div class="bar" style="margin-top:16px"><i data-w="${pct}"></i></div>`:''}
+  </div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><h3><svg data-lucide="circle-dashed"></svg>${t('active')}</h3><span class="sub">${active.length}</span></div>
+      <div id="goal-active">${active.length?active.map(goalRow).join(''):emptyState('target',t('no_goals'),t('no_goals_sub'))}</div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3><svg data-lucide="check-circle-2"></svg>${t('finished')}</h3><span class="sub">${done.length}</span></div>
+      <div id="goal-done">${done.length?done.map(goalRow).join(''):emptyState('trophy',t('finished'),'—')}</div>
+    </div>
+  </div>`;
+  const mount=host=>{
+    animBars(host);
+    const add=()=>{ const v=$('#goal-input',host).value.trim(); if(!v) return;
+      state.goals.push({id:uid(),title:v,done:false,ts:Date.now()}); save(); toast(t('goal_added'),'ok','target'); go('goals'); };
+    $('#goal-add',host).addEventListener('click',add);
+    $('#goal-input',host).addEventListener('keydown',e=>{ if(e.key==='Enter') add(); });
+    $$('[data-toggle]',host).forEach(b=> b.addEventListener('click',()=>{
+      const g=state.goals.find(x=>x.id===b.dataset.toggle); if(g){ g.done=!g.done; save(); if(g.done) toast(t('goal_done'),'ok','trophy'); go('goals'); }
+    }));
+    $$('[data-gdel]',host).forEach(b=> b.addEventListener('click',()=>{
+      state.goals=state.goals.filter(x=>x.id!==b.dataset.gdel); save(); go('goals'); }));
+  };
+  return {html, mount};
+}
+function goalRow(g){
+  return `<div class="lrow"><button class="m-check ${g.done?'done':''}" data-toggle="${g.id}" aria-label="${g.done?t('reopen'):t('complete')}" style="width:24px;height:24px"><svg data-lucide="check"></svg></button>
+    <div class="lmain"><b style="font-weight:500;${g.done?'text-decoration:line-through;color:var(--text-2)':''}">${esc(g.title)}</b></div>
+    <button class="modal-close" data-gdel="${g.id}" aria-label="${t('delete')}" style="width:32px;height:32px"><svg data-lucide="trash-2" style="width:15px;height:15px"></svg></button></div>`;
+}
+
+// ---------- TEAM ----------
+function vTeam(){
+  state.team ||= [];
+  const html=`
+  <div class="page-head"><h1>${t('nav_team')}</h1><p>${t('sub_team')}</p></div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h3><svg data-lucide="user-plus"></svg>${t('add_member')}</h3></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="tm-name" type="text" placeholder="${t('member_name')}" style="flex:1;min-width:160px;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:0 15px;height:46px;outline:none;font-size:14.5px" />
+      <select id="tm-type" style="background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:0 12px;height:46px;outline:none;font-size:14.5px;color:var(--text)">
+        ${Object.keys(TYPES).map(c=>`<option value="${c}">${c} · ${tf(TYPES[c].name)}</option>`).join('')}
+      </select>
+      <button class="btn btn-primary" id="tm-add"><svg data-lucide="plus"></svg>${t('add_member')}</button>
+    </div>
+  </div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><h3><svg data-lucide="users"></svg>${t('nav_team')}</h3><span class="sub">${state.team.length}</span></div>
+      <div id="tm-list">${state.team.length?state.team.map(teamRow).join(''):emptyState('users',t('no_members'),t('no_members_sub'))}</div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3><svg data-lucide="pie-chart"></svg>${t('team_composition')}</h3></div>
+      ${state.team.length?`<div class="chartbox h-donut"><canvas id="c-team"></canvas></div>
+        <div style="height:1px;background:var(--line);margin:16px 0"></div>
+        <h3 style="font-size:14px;margin-bottom:10px;display:flex;gap:8px;align-items:center"><svg data-lucide="lightbulb" style="width:16px;height:16px;color:var(--accent)"></svg>${t('collab_tips')}</h3>
+        <div class="rowlist">${teamTips().map((s,i)=>listItem(['scale','messages-square'][i%2],s,'')).join('')}</div>`
+      :emptyState('pie-chart',t('team_insight'),t('no_members_sub'))}
+    </div>
+  </div>`;
+  const mount=host=>{
+    const add=()=>{ const name=$('#tm-name',host).value.trim()||('Member '+(state.team.length+1)); const type=$('#tm-type',host).value;
+      state.team.push({id:uid(),name,type}); save(); toast(t('member_added'),'ok','user-plus'); go('team'); };
+    $('#tm-add',host).addEventListener('click',add);
+    $('#tm-name',host).addEventListener('keydown',e=>{ if(e.key==='Enter') add(); });
+    $$('[data-tmdel]',host).forEach(b=> b.addEventListener('click',()=>{ state.team=state.team.filter(m=>m.id!==b.dataset.tmdel); save(); go('team'); }));
+    if(state.team.length){
+      const counts=GROUP_ORDER.map(g=> state.team.filter(m=>TYPES[m.type].group===g).length);
+      chartReg.team=new Chart($('#c-team',host), donutCfg(GROUP_ORDER.map(g=>tf(GROUPS[g].name)), counts,
+        GROUP_ORDER.map(g=>GROUPS[g].color)));
+    }
+  };
+  return {html, mount};
+}
+function teamRow(m){ const g=GROUPS[TYPES[m.type].group];
+  return `<div class="lrow"><div class="lic" style="background:${g.color}22;color:${g.color};font-weight:800;font-size:12px">${m.type[0]}${m.type[3]}</div>
+    <div class="lmain"><b>${esc(m.name)}</b><span>${m.type} · ${tf(TYPES[m.type].name)}</span></div>
+    <button class="modal-close" data-tmdel="${m.id}" aria-label="${t('delete')}" style="width:32px;height:32px"><svg data-lucide="trash-2" style="width:15px;height:15px"></svg></button></div>`;
+}
+function teamTips(){ return L()==='th'
+  ? ['จับคู่คนที่คิดภาพใหญ่กับคนที่ลงรายละเอียด เพื่อให้แผนสมบูรณ์','ให้ทั้งคนที่ตัดสินใจเร็วและคนที่ไตร่ตรองได้มีเสียงในการตัดสินใจ']
+  : ['Pair big-picture thinkers with detail-focused members to complete plans.','Give both fast deciders and reflectors a voice in decisions.']; }
+
+// ---------- COACH ----------
+function vCoach(){
+  const msgs = state.coach.length ? state.coach : [{role:'coach',text:t('coach_intro')}];
+  const html=`
+  <div class="page-head"><h1>${t('nav_coach')}</h1><p>${t('sub_coach')}</p></div>
+  <div class="card" style="display:flex;flex-direction:column;height:min(64vh,620px);padding:0;overflow:hidden">
+    <div id="coach-log" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px">
+      ${msgs.map(coachBubble).join('')}
+    </div>
+    <div style="padding:12px;border-top:1px solid var(--line);background:var(--glass-2)">
+      <div class="chips" style="margin-bottom:10px" id="coach-suggest">
+        ${['suggest_focus','suggest_stress','suggest_career','suggest_relation'].map(k=>`<button class="chip" data-sug="${t(k)}" style="cursor:pointer">${t(k)}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:10px">
+        <input id="coach-input" type="text" placeholder="${t('coach_ph')}" style="flex:1;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:0 15px;height:46px;outline:none;font-size:14.5px" />
+        <button class="btn btn-primary" id="coach-send" aria-label="${t('send')}"><svg data-lucide="send"></svg></button>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-2);margin-top:9px;display:flex;align-items:center;gap:6px"><svg data-lucide="info" style="width:13px;height:13px"></svg>${t('coach_note')}</div>
+    </div>
+  </div>`;
+  const mount=host=>{
+    const log=$('#coach-log',host), input=$('#coach-input',host);
+    const scroll=()=> log.scrollTop=log.scrollHeight;
+    scroll();
+    const send=txt=>{
+      const text=(txt??input.value).trim(); if(!text) return; input.value='';
+      state.coach=(state.coach.length?state.coach:[{role:'coach',text:t('coach_intro')}]).concat({role:'user',text});
+      log.insertAdjacentHTML('beforeend', coachBubble({role:'user',text})); refreshIcons(); scroll();
+      // typing indicator
+      const tip=el('div'); tip.innerHTML=coachBubble({role:'coach',text:'···'}); log.appendChild(tip.firstElementChild); scroll();
+      setTimeout(()=>{ log.lastElementChild.remove();
+        const reply=coachReply(text, state.mbti);
+        state.coach.push({role:'coach',text:reply}); save();
+        log.insertAdjacentHTML('beforeend', coachBubble({role:'coach',text:reply})); refreshIcons(); scroll();
+      }, 520);
+    };
+    $('#coach-send',host).addEventListener('click',()=>send());
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter') send(); });
+    $$('[data-sug]',host).forEach(b=> b.addEventListener('click',()=>send(b.dataset.sug)));
+  };
+  return {html, mount};
+}
+function coachBubble(m){
+  const me=m.role==='user';
+  return `<div style="display:flex;gap:10px;${me?'flex-direction:row-reverse':''}">
+    <div style="width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;${me?'background:rgba(255,255,255,.06)':'background:linear-gradient(140deg,var(--accent-hover),var(--accent));color:#1a0d00'}">
+      ${me?'<svg data-lucide="user" style="width:16px;height:16px"></svg>':'<svg data-lucide="sparkles" style="width:16px;height:16px"></svg>'}</div>
+    <div style="max-width:78%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.6;${me?'background:var(--accent-soft);border:1px solid var(--accent-line)':'background:var(--bg-2);border:1px solid var(--line)'}">${esc(m.text)}</div>
+  </div>`;
+}
+// Local, type-aware coaching heuristic (ready to swap for a live API call)
+function coachReply(text, code){
+  const ty=TYPES[code], q=text.toLowerCase();
+  const th=L()==='th';
+  const has=(...k)=> k.some(w=> q.includes(w));
+  if(has('focus','concentrate','สมาธิ','โฟกัส'))
+    return th?`ในฐานะ ${code} จุดแข็งของคุณคือ${ty.strengths.th[0]} ลองตัดสิ่งรบกวนแล้วทำงานเป็นช่วง 25 นาที และ${ty.growth.th[1]}`
+             :`As a ${code}, you're strong at ${ty.strengths.en[0].toLowerCase()}. Cut distractions, work in 25-minute focus sprints, and remember to ${ty.growth.en[1].toLowerCase()}.`;
+  if(has('stress','anxious','overwhelm','เครียด','กังวล'))
+    return th?`เมื่อ ${code} เครียด มักมาจากการแบกไว้มากเกินไป ลองพัก 20 นาทีแบบไม่มีจอ และ${ty.growth.th[0]} จะช่วยได้มาก`
+             :`When ${code}s feel stressed it's often from carrying too much. Take a 20-minute screen-free break, and it helps to ${ty.growth.en[0].toLowerCase()}.`;
+  if(has('career','job','work','อาชีพ','งาน'))
+    return th?`อาชีพที่มักเข้ากับ ${code} ได้ดีเช่น ${ty.careers.slice(0,3).join(', ')} เพราะได้ใช้จุดแข็งด้าน${ty.strengths.th[0]}`
+             :`Roles that fit ${code} well include ${ty.careers.slice(0,3).join(', ')} — they let you use your strength in ${ty.strengths.en[0].toLowerCase()}.`;
+  if(has('relationship','partner','love','friend','ความสัมพันธ์','เพื่อน','รัก'))
+    return th?`${tf(ty.love)} คู่ที่มักเข้ากันได้ดีคือ ${ty.best.join(', ')}`
+             :`${tf(ty.love)} You often click well with ${ty.best.join(', ')}.`;
+  if(has('learn','study','เรียน'))
+    return th?tf(ty.learn):tf(ty.learn);
+  return th?`ในฐานะ ${tf(ty.name)} (${code}) — ${tf(ty.blurb)} อยากให้ช่วยเรื่องสมาธิ ความเครียด อาชีพ หรือความสัมพันธ์ดี?`
+           :`As ${tf(ty.name)} (${code}) — ${tf(ty.blurb)} Want tips on focus, stress, career, or relationships?`;
+}
+
+// ---------- SETTINGS ----------
+function vSettings(){
+  const code=state.mbti;
+  const html=`
+  <div class="page-head"><h1>${t('nav_settings')}</h1><p>${t('sub_settings')}</p></div>
+  <div class="grid g-2" style="margin-bottom:18px">
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="fingerprint"></svg>${t('change_mbti')}</h3></div>
+      <p style="color:var(--text-2);font-size:13.5px;margin-bottom:14px">${t('change_mbti_sub')}: <b style="color:var(--text)">${code} · ${tf(TYPES[code].name)}</b></p>
+      <button class="btn btn-ghost btn-block" id="set-mbti"><svg data-lucide="repeat"></svg>${t('change_mbti')}</button>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="user-round"></svg>${t('your_name')}</h3></div>
+      <div style="display:flex;gap:10px">
+        <input id="set-name" type="text" value="${esc(state.name)}" placeholder="${t('name_ph')}" style="flex:1;background:var(--bg-2);border:1px solid var(--line);border-radius:13px;padding:0 15px;height:46px;outline:none;font-size:14.5px" />
+        <button class="btn btn-primary" id="set-name-save">${t('save_changes')}</button>
+      </div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="languages"></svg>${t('language')}</h3></div>
+      <div class="seg" role="group" style="width:100%">
+        <button class="${L()==='en'?'on':''}" data-set-lang="en" style="flex:1">English</button>
+        <button class="${L()==='th'?'on':''}" data-set-lang="th" style="flex:1">ไทย</button>
+      </div>
+    </div>
+    <div class="card hover">
+      <div class="card-h"><h3><svg data-lucide="trash-2"></svg>${t('reset_data')}</h3></div>
+      <p style="color:var(--text-2);font-size:13.5px;margin-bottom:14px">${t('reset_sub')}</p>
+      <button class="btn btn-ghost btn-block" id="set-reset" style="border-color:rgba(239,68,68,.4);color:var(--danger)"><svg data-lucide="alert-triangle"></svg>${t('reset_data')}</button>
+    </div>
+  </div>
+  <div class="card hover">
+    <div class="card-h"><h3><svg data-lucide="info"></svg>${t('about')}</h3></div>
+    <p style="color:var(--text-2);font-size:14px;line-height:1.75;max-width:70ch">${t('about_text')}</p>
+    <div class="chips" style="margin-top:14px">
+      <span class="pill accent"><svg data-lucide="sparkles"></svg>MBTI OS</span>
+      <span class="pill"><svg data-lucide="shield-check"></svg>Local-first</span>
+      <span class="pill"><svg data-lucide="git-branch"></svg>v1.0</span>
+    </div>
+  </div>`;
+  const mount=host=>{
+    $('#set-mbti',host).addEventListener('click',()=>openMbtiModal());
+    $('#set-name-save',host).addEventListener('click',()=>{ state.name=$('#set-name',host).value.trim(); save(); updateSidebarCard(); toast(t('saved'),'ok','check'); });
+    $$('[data-set-lang]',host).forEach(b=> b.addEventListener('click',()=> setLang(b.dataset.setLang)));
+    $('#set-reset',host).addEventListener('click',()=>{ if(confirm(t('reset_confirm'))){ localStorage.removeItem(LS); location.reload(); } });
+  };
+  return {html, mount};
+}
+
+function emptyState(icon,title,sub){
+  return `<div class="empty"><div class="ill"><svg data-lucide="${icon}"></svg></div><b>${title}</b><div>${sub}</div></div>`;
+}
+
+const VIEWS={ dashboard:vDashboard, personality:vPersonality, growth:vGrowth, career:vCareer, learning:vLearning,
+  relationship:vRelationship, journal:vJournal, goals:vGoals, team:vTeam, coach:vCoach, settings:vSettings };
+
+/* ========================= 7) CHARTS ======================= */
+const CH_TEXT='#A0A0A0', CH_GRID='rgba(255,255,255,.06)', CH_LINE='rgba(255,255,255,.1)';
+if(window.Chart){
+  Chart.defaults.font.family="Inter, Prompt, sans-serif";
+  Chart.defaults.color=CH_TEXT;
+  Chart.defaults.plugins.legend.labels.boxWidth=10;
+  Chart.defaults.plugins.legend.labels.boxHeight=10;
+  Chart.defaults.plugins.legend.labels.usePointStyle=true;
+  Chart.defaults.plugins.legend.labels.padding=16;
+}
+const animOpt = ()=> prefersReduced()?{duration:0}:{duration:900, easing:'easeOutQuart'};
+
+function lineCfg(labels, series){
+  return { type:'line',
+    data:{ labels, datasets: series.map(s=>({
+      label:s.label, data:s.data, borderColor:s.color,
+      backgroundColor:(ctx)=>{ const {ctx:c,chartArea}=ctx.chart; if(!chartArea) return s.color+'22';
+        const g=c.createLinearGradient(0,chartArea.top,0,chartArea.bottom); g.addColorStop(0,s.color+'44'); g.addColorStop(1,s.color+'02'); return g; },
+      borderWidth:2.5, tension:.4, fill:true, pointRadius:0, pointHoverRadius:5, pointHoverBackgroundColor:s.color,
+      borderDash:s.dash?[5,5]:[] })) },
+    options:{ responsive:true, maintainAspectRatio:false, animation:animOpt(),
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{position:'top',align:'end'}, tooltip:tooltipStyle() },
+      scales:{ x:{grid:{color:'transparent'},border:{color:CH_LINE}}, y:{grid:{color:CH_GRID},border:{display:false},min:0,max:100,ticks:{stepSize:25}} } } };
+}
+function radarCfg(labels, data){
+  return { type:'radar',
+    data:{ labels, datasets:[{ label:'', data, borderColor:'#FF7A00', backgroundColor:'rgba(255,122,0,.18)',
+      borderWidth:2, pointBackgroundColor:'#FF9D3D', pointBorderColor:'#fff', pointRadius:4, pointHoverRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, animation:animOpt(),
+      plugins:{ legend:{display:false}, tooltip:tooltipStyle() },
+      scales:{ r:{ min:0,max:100, grid:{color:CH_GRID}, angleLines:{color:CH_GRID},
+        pointLabels:{color:'#fff',font:{size:12,weight:'600'}}, ticks:{display:false,stepSize:25} } } } };
+}
+function donutCfg(labels, data, colors){
+  return { type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderColor:'#111', borderWidth:3, hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'66%', animation:prefersReduced()?{duration:0}:{animateRotate:true,duration:900},
+      plugins:{ legend:{position:'bottom'}, tooltip:tooltipStyle() } } };
+}
+function tooltipStyle(){ return { backgroundColor:'#181818', borderColor:'rgba(255,255,255,.12)', borderWidth:1,
+  titleColor:'#fff', bodyColor:'#A0A0A0', padding:12, cornerRadius:10, boxPadding:5, usePointStyle:true }; }
+
+/* ===================== 8) UI: modal ======================= */
+const scrim=$('#modal-scrim');
+function openModal(title, desc){ $('#modal-title').textContent=title; $('#modal-desc').textContent=desc||'';
+  scrim.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(){ scrim.classList.remove('open'); document.body.style.overflow=''; }
+$('#modal-close').addEventListener('click', closeModal);
+scrim.addEventListener('click', e=>{ if(e.target===scrim) closeModal(); });
+
+function openMbtiModal(){
+  openModal(t('choose_title'), t('choose_desc'));
+  const body=$('#modal-body');
+  body.innerHTML = GROUP_ORDER.map(gk=>{ const g=GROUPS[gk]; return `
+    <div class="mbti-group">
+      <div class="gh"><span class="gdot" style="background:${g.color}"></span>
+        <span class="gname" style="color:${g.color}">${tf(g.name)}</span><span class="gdesc">— ${tf(g.desc)}</span></div>
+      <div class="mbti-grid">
+        ${TYPES_BY_GROUP[gk].map(code=>{ const ty=TYPES[code]; const sel=state.mbti===code?'sel':''; return `
+          <button class="mbti-cell ${sel}" data-code="${code}">
+            <span class="tick"><svg data-lucide="check-circle-2"></svg></span>
+            <b>${code}</b><span>${tf(ty.name)}</span></button>`; }).join('')}
+      </div>
+    </div>`; }).join('');
+  refreshIcons();
+  $$('.mbti-cell', body).forEach(c=> c.addEventListener('click', ()=> selectType(c.dataset.code)));
+}
+function selectType(code){
+  state.mbti=code; state.onboarded=true; save();
+  closeModal(); updateSidebarCard();
+  if($('#onboard').hidden===false){ hideOnboard(); }
+  toast(t('type_saved'), 'ok', 'check-circle-2', TYPES[code].code+' · '+tf(TYPES[code].name));
+  go(state.view||'dashboard');
+}
+// quick read-only preview from relationship view
+function previewType(code){
+  const ty=TYPES[code], g=GROUPS[ty.group];
+  openModal(code+' · '+tf(ty.name), tf(g.name));
+  $('#modal-body').innerHTML=`
+    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px">${tf(ty.blurb)}</p>
+    <h3 style="font-size:14px;margin-bottom:10px">${t('strengths')}</h3>
+    <div class="chips" style="margin-bottom:16px">${ty.strengths[L()].map(s=>`<div class="chip"><svg data-lucide="check-circle-2"></svg>${esc(s)}</div>`).join('')}</div>
+    <div class="chartbox h-radar" style="height:260px"><canvas id="c-preview"></canvas></div>`;
+  refreshIcons();
+  if(chartReg.preview){ chartReg.preview.destroy(); }
+  chartReg.preview=new Chart($('#c-preview'), radarCfg(
+    [t('trait_strategy'),t('trait_empathy'),t('trait_structure'),t('trait_adaptability'),t('trait_drive')], ty.radar));
+}
+
+/* ===================== 8) UI: toast ======================= */
+function toast(title, kind='info', icon='info', sub){
+  const box=$('#toasts');
+  const n=el('div',`toast ${kind}`);
+  n.innerHTML=`<div class="ti"><svg data-lucide="${icon}"></svg></div><div><b>${esc(title)}</b>${sub?`<span>${esc(sub)}</span>`:''}</div>`;
+  box.appendChild(n); refreshIcons();
+  requestAnimationFrame(()=> n.classList.add('show'));
+  setTimeout(()=>{ n.classList.remove('show'); setTimeout(()=>n.remove(),450); }, 3200);
+}
+
+/* ===================== 8) UI: FAB ======================== */
+function buildFab(){
+  const menu=$('#fab-menu');
+  const items=[ {icon:'notebook-pen',label:t('qa_journal'),view:'journal'},
+    {icon:'target',label:t('qa_goal'),view:'goals'}, {icon:'sparkles',label:t('qa_coach'),view:'coach'} ];
+  menu.innerHTML=items.map(i=>`<div class="fitem"><span class="flabel">${i.label}</span>
+    <button class="fbtn" data-fview="${i.view}" aria-label="${i.label}"><svg data-lucide="${i.icon}"></svg></button></div>`).join('');
+  $$('[data-fview]',menu).forEach(b=> b.addEventListener('click',()=>{ toggleFab(false); go(b.dataset.fview); }));
+  refreshIcons();
+}
+function toggleFab(force){ const w=$('#fab-wrap'); const open=force??!w.classList.contains('open');
+  w.classList.toggle('open',open); $('#fab').setAttribute('aria-expanded',open); }
+$('#fab').addEventListener('click',()=>toggleFab());
+document.addEventListener('click', e=>{ if(!e.target.closest('#fab-wrap')) toggleFab(false); });
+
+/* ================ 8) UI: keyboard shortcuts ============== */
+document.addEventListener('keydown', e=>{
+  if(e.target.matches('input,textarea,select')){ if(e.key==='Escape') e.target.blur(); return; }
+  if(e.key==='Escape'){ closeModal(); toggleFab(false); return; }
+  if(e.key==='/'){ e.preventDefault(); $('#search').focus(); return; }
+  if(e.key==='?'){ toast(t('shortcuts'),'info','command','1–9 · sections   /  search   ?  help'); return; }
+  if(e.key==='l' || e.key==='L'){ setLang(L()==='en'?'th':'en'); return; }
+  const n=parseInt(e.key,10);
+  if(n>=1 && n<=NAV.length){ go(NAV[n-1].id); }
+});
+// header controls
+$$('[data-lang-set]').forEach(b=> b.addEventListener('click',()=> setLang(b.dataset.langSet)));
+$('#notif-btn').addEventListener('click',()=> toast(t('kb_hint'),'info','bell'));
+$('#profile-btn').addEventListener('click',()=> go('settings'));
+$('#search').addEventListener('keydown', e=>{ if(e.key!=='Enter') return;
+  const q=e.target.value.trim().toLowerCase(); if(!q) return;
+  const hit=NAV.find(nv=> t('nav_'+nv.id).toLowerCase().includes(q) || nv.id.includes(q));
+  if(hit){ go(hit.id); e.target.value=''; e.target.blur(); } });
+
+// button ripple (event delegation)
+document.addEventListener('pointerdown', e=>{ const btn=e.target.closest('.btn'); if(!btn||prefersReduced()) return;
+  const r=btn.getBoundingClientRect(), sz=Math.max(r.width,r.height), rip=el('span','ripple');
+  rip.style.width=rip.style.height=sz+'px'; rip.style.left=(e.clientX-r.left-sz/2)+'px'; rip.style.top=(e.clientY-r.top-sz/2)+'px';
+  btn.appendChild(rip); setTimeout(()=>rip.remove(),600); });
+
+/* ===================== 9) ONBOARDING ===================== */
+const onboard=$('#onboard');
+function showOnboard(){ onboard.hidden=false; $('#app').hidden=true; }
+function hideOnboard(){
+  if(prefersReduced()){ onboard.hidden=true; }
+  else{ gsap.to(onboard,{opacity:0,duration:.4,onComplete:()=>{ onboard.hidden=true; onboard.style.opacity=''; }}); }
+  $('#app').hidden=false;
+  gsap && !prefersReduced() && gsap.from('.app',{opacity:0,duration:.5});
+}
+$('#ob-select').addEventListener('click', openMbtiModal);
+$('#ob-unknown').addEventListener('click', ()=>{ // sensible default so app is explorable
+  toast(L()==='th'?'ตั้งค่าเริ่มต้นให้แล้ว เปลี่ยนได้ในการตั้งค่า':'Set a starting type — change it in Settings','info','info');
+  selectType('INFP');
+});
+
+/* ===================== 9) BOOT ========================== */
+const api={ go, previewType, openMbtiModal, setLang };
+window.__mbtios=api;
+
+function boot(){
+  applyLang();
+  buildNav();
+  buildFab();
+  updateSidebarCard();
+  // fade boot loader
+  const b=$('#boot');
+  setTimeout(()=>{ b.classList.add('fade'); setTimeout(()=>b.hidden=true, 500); }, 620);
+
+  if(state.mbti && state.onboarded){
+    $('#app').hidden=false; onboard.hidden=true;
+    go(state.view||'dashboard');
+    setTimeout(()=> toast(t('welcome_toast'),'info','sparkles', state.mbti+' · '+tf(TYPES[state.mbti].name)), 900);
+  }else{
+    showOnboard();
+  }
+  refreshIcons();
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+})();
+
+</script>
+</body>
+</html>
